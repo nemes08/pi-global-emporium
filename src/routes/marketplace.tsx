@@ -43,8 +43,8 @@ function Marketplace() {
       if (filters.transmission && l.transmission !== filters.transmission) return false;
       if (filters.condition && l.condition !== filters.condition) return false;
       if (filters.verified && !l.verified) return false;
-      if (filters.priceMin && l.pricePi < parseFloat(filters.priceMin)) return false;
-      if (filters.priceMax && l.pricePi > parseFloat(filters.priceMax)) return false;
+      if (filters.priceMin && l.priceUsd < parseFloat(filters.priceMin)) return false;
+      if (filters.priceMax && l.priceUsd > parseFloat(filters.priceMax)) return false;
       if (filters.year && l.year !== parseInt(filters.year)) return false;
       return true;
     });

@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { LANGS, useI18n, type LangCode } from "@/lib/i18n";
 import { GcvSettings } from "./GcvSettings";
+import { PricingModeToggle } from "@/lib/pricing";
 
 export function Navbar() {
   const { t, lang, setLang } = useI18n();

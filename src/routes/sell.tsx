@@ -38,8 +38,8 @@ function Sell() {
                 {CATEGORIES.map((c) => <option key={c.key} value={c.key} className="bg-onyx">{t(`cat.${c.key}`)}</option>)}
               </select>
             </Field>
-            <Field label={`${t("search.price")} (π)`}>
-              <input required type="number" step="0.0001" className="input" />
+            <Field label={`${t("search.price")} (USD)`}>
+              <input required type="number" step="0.01" min="0" className="input" placeholder="e.g. 100000" />
             </Field>
             <Field label={t("search.country")}><input className="input" /></Field>
             <Field label={t("search.city")}><input className="input" /></Field>

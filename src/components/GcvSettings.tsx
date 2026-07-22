@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { usePricing } from "@/lib/pricing";
+import { usePricing, GCV_USD_PER_PI, PricingModeToggle } from "@/lib/pricing";
 import { useI18n } from "@/lib/i18n";
 
 export function GcvSettings() {
-  const { rates, setRates, reset } = usePricing();
+  const { rates, setRates, reset, mode } = usePricing();
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
 
@@ -15,7 +15,7 @@ export function GcvSettings() {
         title={t("price.settings")}
         className="btn-ghost-silver hidden sm:inline-flex items-center rounded-full px-3 py-1.5 text-xs"
       >
-        ⚙︎ GCV
+        ⚙︎ {mode === "gcv" ? "GCV" : "Market"}
       </button>
 
       {open && (
@@ -25,20 +25,26 @@ export function GcvSettings() {
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="font-display text-xl text-gradient-gold">{t("price.settings")}</h3>
-            <p className="mt-1 text-xs text-muted-foreground">{t("price.disclaimer")}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{t("price.notice")}</p>
+
+            <div className="mt-4">
+              <span className="mb-2 block text-[10px] uppercase tracking-widest text-muted-foreground">
+                {t("price.mode")}
+              </span>
+              <PricingModeToggle />
+            </div>
 
             <div className="mt-5 space-y-4">
+              <div className="rounded-lg border border-gold/30 bg-gold/5 px-3 py-2 text-xs text-silver">
+                <div className="text-[10px] uppercase tracking-widest text-gold/80">{t("price.mode.gcv")}</div>
+                <div className="mt-0.5">1 π = {GCV_USD_PER_PI.toLocaleString("en-US")} USD</div>
+                <div className="mt-0.5 text-[10px] text-muted-foreground">Fixed community reference</div>
+              </div>
               <Field
                 label={t("price.market.label")}
                 value={rates.marketUsdPerPi}
                 onChange={(v) => setRates({ marketUsdPerPi: v })}
                 step={0.01}
-              />
-              <Field
-                label={t("price.gcv.label")}
-                value={rates.gcvUsdPerPi}
-                onChange={(v) => setRates({ gcvUsdPerPi: v })}
-                step={1}
               />
               <div className="grid grid-cols-2 gap-3">
                 <Field label="EUR / USD" value={rates.eurPerUsd} onChange={(v) => setRates({ eurPerUsd: v })} step={0.01} />
