@@ -77,8 +77,8 @@ export function SearchBar({
                   options={[["", t("search.any")], ...TRANSMISSIONS.map((c) => [c, c] as [string, string])]} />
           <Select label={t("search.condition")} value={f.condition} onChange={(v) => set("condition", v)}
                   options={[["", t("search.any")], ...CONDITIONS.map((c) => [c, c] as [string, string])]} />
-          <Input label={`${t("search.price")} (π min)`} value={f.priceMin} onChange={(v) => set("priceMin", v)} type="number" />
-          <Input label={`${t("search.price")} (π max)`} value={f.priceMax} onChange={(v) => set("priceMax", v)} type="number" />
+          <Input label={`${t("search.price")} (USD min)`} value={f.priceMin} onChange={(v) => set("priceMin", v)} type="number" />
+          <Input label={`${t("search.price")} (USD max)`} value={f.priceMax} onChange={(v) => set("priceMax", v)} type="number" />
         </div>
 
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">

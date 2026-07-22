@@ -1,11 +1,14 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useI18n } from "./i18n";
 
+/** Community GCV Reference constant — 1 Pi = 314,159 USD */
+export const GCV_USD_PER_PI = 314159;
+
+export type PricingMode = "gcv" | "market";
+
 export type FxRates = {
-  /** Market rate: USD per 1 Pi (from exchanges) */
+  /** Exchange Market Value: USD per 1 Pi (from public exchanges) */
   marketUsdPerPi: number;
-  /** Community Ecosystem Reference (GCV): USD per 1 Pi */
-  gcvUsdPerPi: number;
   /** Fiat cross rates: units per 1 USD */
   eurPerUsd: number;
   tryPerUsd: number;
@@ -13,7 +16,6 @@ export type FxRates = {
 
 const DEFAULT_RATES: FxRates = {
   marketUsdPerPi: 0.32,
-  gcvUsdPerPi: 314159,
   eurPerUsd: 0.92,
   tryPerUsd: 40.5,
 };
@@ -22,17 +24,24 @@ type PricingCtx = {
   rates: FxRates;
   setRates: (r: Partial<FxRates>) => void;
   reset: () => void;
+  mode: PricingMode;
+  setMode: (m: PricingMode) => void;
+  /** USD per 1 Pi for the currently selected mode */
+  usdPerPi: number;
 };
 
 const Ctx = createContext<PricingCtx | null>(null);
 
 export function PricingProvider({ children }: { children: ReactNode }) {
   const [rates, setRatesState] = useState<FxRates>(DEFAULT_RATES);
+  const [mode, setModeState] = useState<PricingMode>("gcv");
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem("pigm.rates");
       if (raw) setRatesState({ ...DEFAULT_RATES, ...JSON.parse(raw) });
+      const m = localStorage.getItem("pigm.mode") as PricingMode | null;
+      if (m === "gcv" || m === "market") setModeState(m);
     } catch {}
   }, []);
 
@@ -44,12 +53,22 @@ export function PricingProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const setMode = (m: PricingMode) => {
+    setModeState(m);
+    try { localStorage.setItem("pigm.mode", m); } catch {}
+  };
+
   const reset = () => {
     setRatesState(DEFAULT_RATES);
     try { localStorage.removeItem("pigm.rates"); } catch {}
   };
 
-  const value = useMemo(() => ({ rates, setRates, reset }), [rates]);
+  const usdPerPi = mode === "gcv" ? GCV_USD_PER_PI : rates.marketUsdPerPi;
+
+  const value = useMemo(
+    () => ({ rates, setRates, reset, mode, setMode, usdPerPi }),
+    [rates, mode, usdPerPi],
+  );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
@@ -59,60 +78,98 @@ export function usePricing() {
   return c;
 }
 
-const fmt = (n: number, currency: string, locale = "en-US") =>
+const fmtCcy = (n: number, currency: string, locale = "en-US") =>
   new Intl.NumberFormat(locale, {
     style: "currency",
     currency,
     maximumFractionDigits: n >= 1000 ? 0 : 2,
   }).format(n);
 
-const fmtPi = (n: number) =>
-  new Intl.NumberFormat("en-US", { maximumFractionDigits: 4 }).format(n) + " π";
+const fmtPi = (n: number) => {
+  const digits = n >= 1000 ? 2 : n >= 1 ? 5 : 8;
+  return new Intl.NumberFormat("en-US", { maximumFractionDigits: digits }).format(n) + " π";
+};
 
-export function PriceDisplay({ pi, compact = false }: { pi: number; compact?: boolean }) {
-  const { rates } = usePricing();
+/**
+ * PriceDisplay renders a listing price given a seller-entered USD amount.
+ * The Pi amount is derived from the active pricing mode (GCV by default).
+ * Seller-entered USD is never overwritten.
+ */
+export function PriceDisplay({ usd, compact = false }: { usd: number; compact?: boolean }) {
+  const { usdPerPi, mode, rates } = usePricing();
   const { t } = useI18n();
 
-  const usdMarket = pi * rates.marketUsdPerPi;
-  const usdGcv = pi * rates.gcvUsdPerPi;
-  const eur = usdMarket * rates.eurPerUsd;
-  const tryv = usdMarket * rates.tryPerUsd;
+  const pi = usd / usdPerPi;
+  const eur = usd * rates.eurPerUsd;
+  const tryv = usd * rates.tryPerUsd;
 
   return (
     <div className="space-y-2">
       <div className="flex items-baseline justify-between gap-3">
-        <span className="text-xs uppercase tracking-widest text-muted-foreground">{t("price.seller")}</span>
+        <span className="text-xs uppercase tracking-widest text-muted-foreground">
+          {t("price.seller")}
+        </span>
         <span className="font-display text-2xl text-gradient-gold">{fmtPi(pi)}</span>
       </div>
 
       <div className="hairline-gold" />
 
       <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
-        <dt className="text-muted-foreground">{t("price.market")}</dt>
-        <dd className="text-right text-silver">{fmt(usdMarket, "USD")}</dd>
+        <dt className="text-muted-foreground">USD</dt>
+        <dd className="text-right text-silver">{fmtCcy(usd, "USD")}</dd>
 
         <dt className="text-muted-foreground">EUR</dt>
-        <dd className="text-right text-silver">{fmt(eur, "EUR")}</dd>
+        <dd className="text-right text-silver">{fmtCcy(eur, "EUR")}</dd>
 
         <dt className="text-muted-foreground">TRY</dt>
-        <dd className="text-right text-silver">{fmt(tryv, "TRY")}</dd>
+        <dd className="text-right text-silver">{fmtCcy(tryv, "TRY")}</dd>
 
-        {!compact && (
-          <>
-            <dt className="col-span-2 mt-1 text-[10px] uppercase tracking-widest text-gold/80">
-              {t("price.gcv")}
-            </dt>
-            <dt className="text-muted-foreground">USD (GCV)</dt>
-            <dd className="text-right text-silver">{fmt(usdGcv, "USD")}</dd>
-          </>
-        )}
+        <dt className="col-span-2 mt-1 text-[10px] uppercase tracking-widest text-gold/80">
+          {mode === "gcv" ? t("price.gcv") : t("price.market")}
+        </dt>
+        <dt className="text-muted-foreground">
+          {mode === "gcv" ? "1 π (GCV)" : "1 π (Market)"}
+        </dt>
+        <dd className="text-right text-silver">{fmtCcy(usdPerPi, "USD")}</dd>
       </dl>
 
       {!compact && (
         <p className="pt-1 text-[10px] leading-snug text-muted-foreground/80">
-          {t("price.disclaimer")}
+          {t("price.notice")}
         </p>
       )}
+    </div>
+  );
+}
+
+/** Compact segmented control to switch pricing mode (GCV / Market). */
+export function PricingModeToggle({ className = "" }: { className?: string }) {
+  const { mode, setMode } = usePricing();
+  const { t } = useI18n();
+  const base =
+    "px-3 py-1.5 text-[11px] font-medium uppercase tracking-widest transition-colors";
+  return (
+    <div
+      role="tablist"
+      aria-label={t("price.mode")}
+      className={`inline-flex items-center rounded-full border border-white/10 bg-black/40 p-0.5 ${className}`}
+    >
+      <button
+        role="tab"
+        aria-selected={mode === "gcv"}
+        onClick={() => setMode("gcv")}
+        className={`${base} rounded-full ${mode === "gcv" ? "btn-gold text-onyx" : "text-silver/80 hover:text-white"}`}
+      >
+        GCV
+      </button>
+      <button
+        role="tab"
+        aria-selected={mode === "market"}
+        onClick={() => setMode("market")}
+        className={`${base} rounded-full ${mode === "market" ? "btn-gold text-onyx" : "text-silver/80 hover:text-white"}`}
+      >
+        {t("price.mode.market.short")}
+      </button>
     </div>
   );
 }
