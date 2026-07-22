@@ -1,24 +1,58 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
+import { Hero } from "@/components/Hero";
+import { CategoryGrid } from "@/components/CategoryGrid";
+import { SearchBar } from "@/components/SearchBar";
+import { ListingCard } from "@/components/ListingCard";
+import { LISTINGS } from "@/lib/catalog";
+import { useNavigate } from "@tanstack/react-router";
+import { useI18n } from "@/lib/i18n";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "Pi Global Marketplace — Luxury Web3 Marketplace on Pi Network" },
+      { name: "description", content: "One marketplace. Unlimited possibilities. Powered by Pi. Buy and sell vehicles, real estate, electronics, luxury goods and services in the Pi Network ecosystem." },
+      { property: "og:title", content: "Pi Global Marketplace" },
+      { property: "og:description", content: "The premium global Web3 marketplace for the Pi Network ecosystem." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: Home,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function Home() {
+  const navigate = useNavigate();
+  const { t } = useI18n();
+  const featured = LISTINGS.slice(0, 6);
+
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <>
+      <Navbar />
+      <main>
+        <Hero />
+
+        <div className="mx-auto -mt-4 max-w-7xl px-4 sm:px-6">
+          <SearchBar onSubmit={() => navigate({ to: "/marketplace" })} />
+        </div>
+
+        <CategoryGrid />
+
+        <section className="mx-auto max-w-7xl px-4 pb-24 sm:px-6">
+          <div className="mb-8 flex items-end justify-between">
+            <div>
+              <h2 className="font-display text-3xl sm:text-4xl text-silver">{t("featured.title")}</h2>
+              <p className="mt-2 text-sm text-muted-foreground">{t("featured.subtitle")}</p>
+            </div>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {featured.map((l) => <ListingCard key={l.id} item={l} />)}
+          </div>
+        </section>
+      </main>
+      <Footer />
+    </>
   );
 }
