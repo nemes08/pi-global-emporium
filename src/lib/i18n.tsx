@@ -71,12 +71,18 @@ const en: Dict = {
 
   "price.seller": "Seller Price",
   "price.market": "Exchange Market Value",
-  "price.gcv": "Community Ecosystem Reference (GCV)",
+  "price.gcv": "Community GCV Reference (1 Pi = 314,159 USD)",
+  "price.notice":
+    "Community GCV Reference (1 Pi = 314,159 USD) is a community ecosystem reference and is NOT an official Pi Network exchange rate.",
   "price.disclaimer":
-    "The Community Ecosystem Reference (GCV) is a community reference value and is not an official Pi Network exchange rate.",
-  "price.settings": "GCV Settings",
+    "Community GCV Reference (1 Pi = 314,159 USD) is a community ecosystem reference and is NOT an official Pi Network exchange rate.",
+  "price.settings": "Pricing Settings",
   "price.gcv.label": "GCV rate (USD per 1 Pi)",
   "price.market.label": "Market rate (USD per 1 Pi)",
+  "price.mode": "Pricing mode",
+  "price.mode.gcv": "Community GCV Reference",
+  "price.mode.market": "Exchange Market Value",
+  "price.mode.market.short": "Market",
 
   "footer.tagline": "The premium global marketplace for the Pi Network ecosystem.",
   "footer.rights": "All rights reserved.",

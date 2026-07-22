@@ -34,7 +34,7 @@ export function ListingCard({ item }: { item: Listing }) {
         </p>
 
         <div className="mt-4 rounded-xl bg-black/30 p-4">
-          <PriceDisplay pi={item.pricePi} compact />
+          <PriceDisplay usd={item.priceUsd} compact />
         </div>
       </div>
     </article>

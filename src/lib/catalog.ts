@@ -1,4 +1,9 @@
-export type CategoryKey = "vehicles" | "electronics" | "realestate" | "luxury" | "services";
+export type CategoryKey =
+  | "vehicles"
+  | "electronics"
+  | "realestate"
+  | "luxury"
+  | "services";
 
 export const CATEGORIES: {
   key: CategoryKey;
@@ -25,7 +30,8 @@ export type Listing = {
   fuel?: string;
   transmission?: string;
   condition: "new" | "used" | "certified";
-  pricePi: number;
+  /** Seller-entered price in USD. Pi is derived from the active pricing mode. */
+  priceUsd: number;
   verified: boolean;
   image: string;
 };
@@ -35,12 +41,11 @@ export const LISTINGS: Listing[] = [
     id: "l1",
     title: "Porsche 911 Turbo S",
     category: "vehicles",
-    brand: "Porsche",
-    model: "911 Turbo S",
+    brand: "Porsche", model: "911 Turbo S",
     country: "Germany", city: "Munich",
     year: 2023, mileage: 8200, fuel: "Petrol", transmission: "PDK",
     condition: "certified",
-    pricePi: 480000,
+    priceUsd: 245000,
     verified: true,
     image: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=1200&q=80",
   },
@@ -50,7 +55,7 @@ export const LISTINGS: Listing[] = [
     category: "realestate",
     country: "Turkey", city: "Istanbul",
     condition: "new",
-    pricePi: 3200000,
+    priceUsd: 4850000,
     verified: true,
     image: "https://images.unsplash.com/photo-1613977257363-707ba9348227?w=1200&q=80",
   },
@@ -61,7 +66,7 @@ export const LISTINGS: Listing[] = [
     brand: "Rolex", model: "Daytona",
     country: "Switzerland", city: "Geneva",
     condition: "used",
-    pricePi: 96000,
+    priceUsd: 38500,
     verified: true,
     image: "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=1200&q=80",
   },
@@ -72,7 +77,7 @@ export const LISTINGS: Listing[] = [
     brand: "Apple", model: "MacBook Pro",
     country: "USA", city: "New York",
     condition: "new",
-    pricePi: 12800,
+    priceUsd: 4200,
     verified: true,
     image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=1200&q=80",
   },
@@ -82,7 +87,7 @@ export const LISTINGS: Listing[] = [
     category: "services",
     country: "France", city: "Paris",
     condition: "new",
-    pricePi: 4500,
+    priceUsd: 15000,
     verified: false,
     image: "https://images.unsplash.com/photo-1522199755839-a2bacb67c546?w=1200&q=80",
   },
@@ -94,7 +99,7 @@ export const LISTINGS: Listing[] = [
     country: "Italy", city: "Milan",
     year: 2022, mileage: 12500, fuel: "Petrol", transmission: "DCT",
     condition: "used",
-    pricePi: 620000,
+    priceUsd: 285000,
     verified: true,
     image: "https://images.unsplash.com/photo-1580414057403-c5f451f30e1c?w=1200&q=80",
   },
