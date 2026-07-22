@@ -39,6 +39,7 @@ export function Navbar() {
                 </option>
               ))}
             </select>
+            <PricingModeToggle className="hidden md:inline-flex" />
             <GcvSettings />
             <button
               className="btn-gold hidden sm:inline-flex items-center rounded-full px-4 py-2 text-sm"
