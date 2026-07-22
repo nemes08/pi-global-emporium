@@ -12,10 +12,10 @@ import { useI18n } from "@/lib/i18n";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Pi Global Marketplace — Luxury Web3 Marketplace on Pi Network" },
-      { name: "description", content: "One marketplace. Unlimited possibilities. Powered by Pi. Buy and sell vehicles, real estate, electronics, luxury goods and services in the Pi Network ecosystem." },
-      { property: "og:title", content: "Pi Global Marketplace" },
-      { property: "og:description", content: "The premium global Web3 marketplace for the Pi Network ecosystem." },
+      { title: "Pi Global Marketplace | Web3 Luxury Marketplace" },
+      { name: "description", content: "Global Web3 marketplace powered by Pi Network. Buy and sell vehicles, real estate, electronics, luxury goods and services with secure Pi transactions." },
+      { property: "og:title", content: "Pi Global Marketplace | Web3 Luxury Marketplace" },
+      { property: "og:description", content: "Global Web3 marketplace powered by Pi Network. Buy and sell vehicles, real estate, electronics, luxury goods and services with secure Pi transactions." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
