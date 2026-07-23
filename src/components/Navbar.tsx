@@ -1,12 +1,20 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { LANGS, useI18n, type LangCode } from "@/lib/i18n";
 import { GcvSettings } from "./GcvSettings";
 import { PricingModeToggle } from "@/lib/pricing";
+import { useAuth } from "@/lib/auth";
 
 export function Navbar() {
   const { t, lang, setLang } = useI18n();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+
+  async function handleSignOut() {
+    await signOut();
+    navigate({ to: "/", replace: true });
+  }
 
   return (
     <header className="sticky top-0 z-40">
@@ -41,12 +49,23 @@ export function Navbar() {
             </select>
             <PricingModeToggle className="hidden md:inline-flex" />
             <GcvSettings />
-            <button
-              className="btn-gold hidden sm:inline-flex items-center rounded-full px-4 py-2 text-sm"
-              onClick={() => alert("Pi Wallet connection will be enabled inside Pi Browser.")}
-            >
-              {t("nav.wallet")}
-            </button>
+            {user ? (
+              <>
+                <Link to="/dashboard" className="btn-gold hidden sm:inline-flex items-center rounded-full px-4 py-2 text-sm">
+                  My Account
+                </Link>
+                <button
+                  onClick={handleSignOut}
+                  className="hidden md:inline-flex btn-ghost-silver rounded-full px-3 py-2 text-xs"
+                >
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <Link to="/auth" className="btn-gold hidden sm:inline-flex items-center rounded-full px-4 py-2 text-sm">
+                Sign in
+              </Link>
+            )}
             <button
               className="md:hidden rounded-full border border-white/10 bg-white/5 px-3 py-2 text-silver"
               onClick={() => setOpen((v) => !v)}
@@ -74,9 +93,20 @@ export function Navbar() {
                 ))}
               </select>
             </div>
-            <button className="btn-gold w-full rounded-full px-4 py-2 text-sm" onClick={() => alert("Pi Wallet connection will be enabled inside Pi Browser.")}>
-              {t("nav.wallet")}
-            </button>
+            {user ? (
+              <>
+                <Link to="/dashboard" onClick={() => setOpen(false)} className="btn-gold w-full inline-flex justify-center rounded-full px-4 py-2 text-sm">
+                  My Account
+                </Link>
+                <button className="w-full btn-ghost-silver rounded-full px-4 py-2 text-sm" onClick={() => { setOpen(false); handleSignOut(); }}>
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <Link to="/auth" onClick={() => setOpen(false)} className="btn-gold w-full inline-flex justify-center rounded-full px-4 py-2 text-sm">
+                Sign in
+              </Link>
+            )}
           </div>
         )}
       </div>
