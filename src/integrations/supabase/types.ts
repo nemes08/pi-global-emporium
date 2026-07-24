@@ -14,6 +14,345 @@ export type Database = {
   }
   public: {
     Tables: {
+      conversations: {
+        Row: {
+          buyer_id: string
+          created_at: string
+          id: string
+          last_message_at: string
+          listing_id: string | null
+          seller_id: string
+        }
+        Insert: {
+          buyer_id: string
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          listing_id?: string | null
+          seller_id: string
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          listing_id?: string | null
+          seller_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      favorites: {
+        Row: {
+          created_at: string
+          listing_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          listing_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          listing_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      listing_media: {
+        Row: {
+          created_at: string
+          id: string
+          listing_id: string
+          media_type: string
+          seller_id: string
+          sort_order: number
+          storage_path: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          listing_id: string
+          media_type?: string
+          seller_id: string
+          sort_order?: number
+          storage_path: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          listing_id?: string
+          media_type?: string
+          seller_id?: string
+          sort_order?: number
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listing_media_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      listings: {
+        Row: {
+          brand: string | null
+          category: string
+          city: string | null
+          condition: string | null
+          country: string | null
+          cover_image: string | null
+          created_at: string
+          description: string | null
+          fuel: string | null
+          id: string
+          mileage: number | null
+          model: string | null
+          negotiable: boolean
+          price_usd: number
+          pricing_mode: string
+          seller_email: string | null
+          seller_id: string
+          seller_phone: string | null
+          status: Database["public"]["Enums"]["listing_status"]
+          title: string
+          transmission: string | null
+          updated_at: string
+          views_count: number
+          year: number | null
+        }
+        Insert: {
+          brand?: string | null
+          category: string
+          city?: string | null
+          condition?: string | null
+          country?: string | null
+          cover_image?: string | null
+          created_at?: string
+          description?: string | null
+          fuel?: string | null
+          id?: string
+          mileage?: number | null
+          model?: string | null
+          negotiable?: boolean
+          price_usd?: number
+          pricing_mode?: string
+          seller_email?: string | null
+          seller_id: string
+          seller_phone?: string | null
+          status?: Database["public"]["Enums"]["listing_status"]
+          title: string
+          transmission?: string | null
+          updated_at?: string
+          views_count?: number
+          year?: number | null
+        }
+        Update: {
+          brand?: string | null
+          category?: string
+          city?: string | null
+          condition?: string | null
+          country?: string | null
+          cover_image?: string | null
+          created_at?: string
+          description?: string | null
+          fuel?: string | null
+          id?: string
+          mileage?: number | null
+          model?: string | null
+          negotiable?: boolean
+          price_usd?: number
+          pricing_mode?: string
+          seller_email?: string | null
+          seller_id?: string
+          seller_phone?: string | null
+          status?: Database["public"]["Enums"]["listing_status"]
+          title?: string
+          transmission?: string | null
+          updated_at?: string
+          views_count?: number
+          year?: number | null
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          body: string
+          conversation_id: string
+          created_at: string
+          id: string
+          read_at: string | null
+          sender_id: string
+        }
+        Insert: {
+          body: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          sender_id: string
+        }
+        Update: {
+          body?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          link: string | null
+          read_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      offers: {
+        Row: {
+          amount_usd: number
+          buyer_id: string
+          created_at: string
+          id: string
+          listing_id: string
+          message: string | null
+          seller_id: string
+          status: Database["public"]["Enums"]["offer_status"]
+          updated_at: string
+        }
+        Insert: {
+          amount_usd: number
+          buyer_id: string
+          created_at?: string
+          id?: string
+          listing_id: string
+          message?: string | null
+          seller_id: string
+          status?: Database["public"]["Enums"]["offer_status"]
+          updated_at?: string
+        }
+        Update: {
+          amount_usd?: number
+          buyer_id?: string
+          created_at?: string
+          id?: string
+          listing_id?: string
+          message?: string | null
+          seller_id?: string
+          status?: Database["public"]["Enums"]["offer_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offers_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          buyer_id: string
+          created_at: string
+          id: string
+          listing_id: string
+          notes: string | null
+          pi_tx_id: string | null
+          price_usd: number
+          seller_id: string
+          status: Database["public"]["Enums"]["order_status"]
+          updated_at: string
+        }
+        Insert: {
+          buyer_id: string
+          created_at?: string
+          id?: string
+          listing_id: string
+          notes?: string | null
+          pi_tx_id?: string | null
+          price_usd: number
+          seller_id: string
+          status?: Database["public"]["Enums"]["order_status"]
+          updated_at?: string
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string
+          id?: string
+          listing_id?: string
+          notes?: string | null
+          pi_tx_id?: string | null
+          price_usd?: number
+          seller_id?: string
+          status?: Database["public"]["Enums"]["order_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -68,6 +407,68 @@ export type Database = {
         }
         Relationships: []
       }
+      recently_viewed: {
+        Row: {
+          listing_id: string
+          user_id: string
+          viewed_at: string
+        }
+        Insert: {
+          listing_id: string
+          user_id: string
+          viewed_at?: string
+        }
+        Update: {
+          listing_id?: string
+          user_id?: string
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recently_viewed_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      verification_requests: {
+        Row: {
+          created_at: string
+          document_type: string
+          document_url: string | null
+          full_legal_name: string
+          id: string
+          notes: string | null
+          status: Database["public"]["Enums"]["verification_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          document_type: string
+          document_url?: string | null
+          full_legal_name: string
+          id?: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["verification_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          document_type?: string
+          document_url?: string | null
+          full_legal_name?: string
+          id?: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["verification_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -76,7 +477,21 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      listing_status: "draft" | "active" | "reserved" | "sold" | "archived"
+      offer_status:
+        | "pending"
+        | "accepted"
+        | "rejected"
+        | "withdrawn"
+        | "expired"
+      order_status:
+        | "pending"
+        | "paid"
+        | "shipped"
+        | "completed"
+        | "cancelled"
+        | "refunded"
+      verification_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -203,6 +618,18 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      listing_status: ["draft", "active", "reserved", "sold", "archived"],
+      offer_status: ["pending", "accepted", "rejected", "withdrawn", "expired"],
+      order_status: [
+        "pending",
+        "paid",
+        "shipped",
+        "completed",
+        "cancelled",
+        "refunded",
+      ],
+      verification_status: ["pending", "approved", "rejected"],
+    },
   },
 } as const

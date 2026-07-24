@@ -16,9 +16,22 @@ import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ListingIdRouteImport } from './routes/listing.$id'
+import { Route as AuthenticatedWalletRouteImport } from './routes/_authenticated/wallet'
+import { Route as AuthenticatedVerificationRouteImport } from './routes/_authenticated/verification'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedRecentlyViewedRouteImport } from './routes/_authenticated/recently-viewed'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedOrdersRouteImport } from './routes/_authenticated/orders'
+import { Route as AuthenticatedOffersRouteImport } from './routes/_authenticated/offers'
+import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
+import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
+import { Route as AuthenticatedListingsRouteImport } from './routes/_authenticated/listings'
+import { Route as AuthenticatedFavoritesRouteImport } from './routes/_authenticated/favorites'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
+import { Route as AuthenticatedListingsNewRouteImport } from './routes/_authenticated/listings.new'
+import { Route as AuthenticatedListingsIdEditRouteImport } from './routes/_authenticated/listings.$id.edit'
 
 const SellRoute = SellRouteImport.update({
   id: '/sell',
@@ -54,14 +67,67 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ListingIdRoute = ListingIdRouteImport.update({
+  id: '/listing/$id',
+  path: '/listing/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedWalletRoute = AuthenticatedWalletRouteImport.update({
+  id: '/wallet',
+  path: '/wallet',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedVerificationRoute =
+  AuthenticatedVerificationRouteImport.update({
+    id: '/verification',
+    path: '/verification',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedRecentlyViewedRoute =
+  AuthenticatedRecentlyViewedRouteImport.update({
+    id: '/recently-viewed',
+    path: '/recently-viewed',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedOrdersRoute = AuthenticatedOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedOffersRoute = AuthenticatedOffersRouteImport.update({
+  id: '/offers',
+  path: '/offers',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedNotificationsRoute =
+  AuthenticatedNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMessagesRoute = AuthenticatedMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedListingsRoute = AuthenticatedListingsRouteImport.update({
+  id: '/listings',
+  path: '/listings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedFavoritesRoute = AuthenticatedFavoritesRouteImport.update({
+  id: '/favorites',
+  path: '/favorites',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -69,6 +135,23 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedListingsNewRoute =
+  AuthenticatedListingsNewRouteImport.update({
+    id: '/new',
+    path: '/new',
+    getParentRoute: () => AuthenticatedListingsRoute,
+  } as any)
+const AuthenticatedListingsIdEditRoute =
+  AuthenticatedListingsIdEditRouteImport.update({
+    id: '/$id/edit',
+    path: '/$id/edit',
+    getParentRoute: () => AuthenticatedListingsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -77,9 +160,22 @@ export interface FileRoutesByFullPath {
   '/marketplace': typeof MarketplaceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sell': typeof SellRoute
+  '/analytics': typeof AuthenticatedAnalyticsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/favorites': typeof AuthenticatedFavoritesRoute
+  '/listings': typeof AuthenticatedListingsRouteWithChildren
+  '/messages': typeof AuthenticatedMessagesRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
+  '/offers': typeof AuthenticatedOffersRoute
+  '/orders': typeof AuthenticatedOrdersRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/recently-viewed': typeof AuthenticatedRecentlyViewedRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/verification': typeof AuthenticatedVerificationRoute
+  '/wallet': typeof AuthenticatedWalletRoute
+  '/listing/$id': typeof ListingIdRoute
+  '/listings/new': typeof AuthenticatedListingsNewRoute
+  '/listings/$id/edit': typeof AuthenticatedListingsIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -88,9 +184,22 @@ export interface FileRoutesByTo {
   '/marketplace': typeof MarketplaceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sell': typeof SellRoute
+  '/analytics': typeof AuthenticatedAnalyticsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/favorites': typeof AuthenticatedFavoritesRoute
+  '/listings': typeof AuthenticatedListingsRouteWithChildren
+  '/messages': typeof AuthenticatedMessagesRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
+  '/offers': typeof AuthenticatedOffersRoute
+  '/orders': typeof AuthenticatedOrdersRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/recently-viewed': typeof AuthenticatedRecentlyViewedRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/verification': typeof AuthenticatedVerificationRoute
+  '/wallet': typeof AuthenticatedWalletRoute
+  '/listing/$id': typeof ListingIdRoute
+  '/listings/new': typeof AuthenticatedListingsNewRoute
+  '/listings/$id/edit': typeof AuthenticatedListingsIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -101,9 +210,22 @@ export interface FileRoutesById {
   '/marketplace': typeof MarketplaceRoute
   '/reset-password': typeof ResetPasswordRoute
   '/sell': typeof SellRoute
+  '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/favorites': typeof AuthenticatedFavoritesRoute
+  '/_authenticated/listings': typeof AuthenticatedListingsRouteWithChildren
+  '/_authenticated/messages': typeof AuthenticatedMessagesRoute
+  '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
+  '/_authenticated/offers': typeof AuthenticatedOffersRoute
+  '/_authenticated/orders': typeof AuthenticatedOrdersRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/recently-viewed': typeof AuthenticatedRecentlyViewedRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/verification': typeof AuthenticatedVerificationRoute
+  '/_authenticated/wallet': typeof AuthenticatedWalletRoute
+  '/listing/$id': typeof ListingIdRoute
+  '/_authenticated/listings/new': typeof AuthenticatedListingsNewRoute
+  '/_authenticated/listings/$id/edit': typeof AuthenticatedListingsIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -114,9 +236,22 @@ export interface FileRouteTypes {
     | '/marketplace'
     | '/reset-password'
     | '/sell'
+    | '/analytics'
     | '/dashboard'
+    | '/favorites'
+    | '/listings'
+    | '/messages'
+    | '/notifications'
+    | '/offers'
+    | '/orders'
     | '/profile'
+    | '/recently-viewed'
     | '/settings'
+    | '/verification'
+    | '/wallet'
+    | '/listing/$id'
+    | '/listings/new'
+    | '/listings/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -125,9 +260,22 @@ export interface FileRouteTypes {
     | '/marketplace'
     | '/reset-password'
     | '/sell'
+    | '/analytics'
     | '/dashboard'
+    | '/favorites'
+    | '/listings'
+    | '/messages'
+    | '/notifications'
+    | '/offers'
+    | '/orders'
     | '/profile'
+    | '/recently-viewed'
     | '/settings'
+    | '/verification'
+    | '/wallet'
+    | '/listing/$id'
+    | '/listings/new'
+    | '/listings/$id/edit'
   id:
     | '__root__'
     | '/'
@@ -137,9 +285,22 @@ export interface FileRouteTypes {
     | '/marketplace'
     | '/reset-password'
     | '/sell'
+    | '/_authenticated/analytics'
     | '/_authenticated/dashboard'
+    | '/_authenticated/favorites'
+    | '/_authenticated/listings'
+    | '/_authenticated/messages'
+    | '/_authenticated/notifications'
+    | '/_authenticated/offers'
+    | '/_authenticated/orders'
     | '/_authenticated/profile'
+    | '/_authenticated/recently-viewed'
     | '/_authenticated/settings'
+    | '/_authenticated/verification'
+    | '/_authenticated/wallet'
+    | '/listing/$id'
+    | '/_authenticated/listings/new'
+    | '/_authenticated/listings/$id/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -150,6 +311,7 @@ export interface RootRouteChildren {
   MarketplaceRoute: typeof MarketplaceRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SellRoute: typeof SellRoute
+  ListingIdRoute: typeof ListingIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -203,11 +365,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/listing/$id': {
+      id: '/listing/$id'
+      path: '/listing/$id'
+      fullPath: '/listing/$id'
+      preLoaderRoute: typeof ListingIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/wallet': {
+      id: '/_authenticated/wallet'
+      path: '/wallet'
+      fullPath: '/wallet'
+      preLoaderRoute: typeof AuthenticatedWalletRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/verification': {
+      id: '/_authenticated/verification'
+      path: '/verification'
+      fullPath: '/verification'
+      preLoaderRoute: typeof AuthenticatedVerificationRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/recently-viewed': {
+      id: '/_authenticated/recently-viewed'
+      path: '/recently-viewed'
+      fullPath: '/recently-viewed'
+      preLoaderRoute: typeof AuthenticatedRecentlyViewedRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/profile': {
@@ -217,6 +407,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/orders': {
+      id: '/_authenticated/orders'
+      path: '/orders'
+      fullPath: '/orders'
+      preLoaderRoute: typeof AuthenticatedOrdersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/offers': {
+      id: '/_authenticated/offers'
+      path: '/offers'
+      fullPath: '/offers'
+      preLoaderRoute: typeof AuthenticatedOffersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/notifications': {
+      id: '/_authenticated/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/messages': {
+      id: '/_authenticated/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof AuthenticatedMessagesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/listings': {
+      id: '/_authenticated/listings'
+      path: '/listings'
+      fullPath: '/listings'
+      preLoaderRoute: typeof AuthenticatedListingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/favorites': {
+      id: '/_authenticated/favorites'
+      path: '/favorites'
+      fullPath: '/favorites'
+      preLoaderRoute: typeof AuthenticatedFavoritesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -224,19 +456,75 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/analytics': {
+      id: '/_authenticated/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AuthenticatedAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/listings/new': {
+      id: '/_authenticated/listings/new'
+      path: '/new'
+      fullPath: '/listings/new'
+      preLoaderRoute: typeof AuthenticatedListingsNewRouteImport
+      parentRoute: typeof AuthenticatedListingsRoute
+    }
+    '/_authenticated/listings/$id/edit': {
+      id: '/_authenticated/listings/$id/edit'
+      path: '/$id/edit'
+      fullPath: '/listings/$id/edit'
+      preLoaderRoute: typeof AuthenticatedListingsIdEditRouteImport
+      parentRoute: typeof AuthenticatedListingsRoute
+    }
   }
 }
 
+interface AuthenticatedListingsRouteChildren {
+  AuthenticatedListingsNewRoute: typeof AuthenticatedListingsNewRoute
+  AuthenticatedListingsIdEditRoute: typeof AuthenticatedListingsIdEditRoute
+}
+
+const AuthenticatedListingsRouteChildren: AuthenticatedListingsRouteChildren = {
+  AuthenticatedListingsNewRoute: AuthenticatedListingsNewRoute,
+  AuthenticatedListingsIdEditRoute: AuthenticatedListingsIdEditRoute,
+}
+
+const AuthenticatedListingsRouteWithChildren =
+  AuthenticatedListingsRoute._addFileChildren(
+    AuthenticatedListingsRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedFavoritesRoute: typeof AuthenticatedFavoritesRoute
+  AuthenticatedListingsRoute: typeof AuthenticatedListingsRouteWithChildren
+  AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
+  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
+  AuthenticatedOffersRoute: typeof AuthenticatedOffersRoute
+  AuthenticatedOrdersRoute: typeof AuthenticatedOrdersRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedRecentlyViewedRoute: typeof AuthenticatedRecentlyViewedRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedVerificationRoute: typeof AuthenticatedVerificationRoute
+  AuthenticatedWalletRoute: typeof AuthenticatedWalletRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedFavoritesRoute: AuthenticatedFavoritesRoute,
+  AuthenticatedListingsRoute: AuthenticatedListingsRouteWithChildren,
+  AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
+  AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
+  AuthenticatedOffersRoute: AuthenticatedOffersRoute,
+  AuthenticatedOrdersRoute: AuthenticatedOrdersRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedRecentlyViewedRoute: AuthenticatedRecentlyViewedRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedVerificationRoute: AuthenticatedVerificationRoute,
+  AuthenticatedWalletRoute: AuthenticatedWalletRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -250,6 +538,7 @@ const rootRouteChildren: RootRouteChildren = {
   MarketplaceRoute: MarketplaceRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SellRoute: SellRoute,
+  ListingIdRoute: ListingIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
