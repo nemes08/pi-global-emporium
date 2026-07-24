@@ -16,6 +16,7 @@ import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ListingIdRouteImport } from './routes/listing.$id'
 import { Route as AuthenticatedWalletRouteImport } from './routes/_authenticated/wallet'
 import { Route as AuthenticatedVerificationRouteImport } from './routes/_authenticated/verification'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -64,6 +65,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ListingIdRoute = ListingIdRouteImport.update({
+  id: '/listing/$id',
+  path: '/listing/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedWalletRoute = AuthenticatedWalletRouteImport.update({
@@ -167,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/verification': typeof AuthenticatedVerificationRoute
   '/wallet': typeof AuthenticatedWalletRoute
+  '/listing/$id': typeof ListingIdRoute
   '/listings/new': typeof AuthenticatedListingsNewRoute
   '/listings/$id/edit': typeof AuthenticatedListingsIdEditRoute
 }
@@ -190,6 +197,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/verification': typeof AuthenticatedVerificationRoute
   '/wallet': typeof AuthenticatedWalletRoute
+  '/listing/$id': typeof ListingIdRoute
   '/listings/new': typeof AuthenticatedListingsNewRoute
   '/listings/$id/edit': typeof AuthenticatedListingsIdEditRoute
 }
@@ -215,6 +223,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/verification': typeof AuthenticatedVerificationRoute
   '/_authenticated/wallet': typeof AuthenticatedWalletRoute
+  '/listing/$id': typeof ListingIdRoute
   '/_authenticated/listings/new': typeof AuthenticatedListingsNewRoute
   '/_authenticated/listings/$id/edit': typeof AuthenticatedListingsIdEditRoute
 }
@@ -240,6 +249,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/verification'
     | '/wallet'
+    | '/listing/$id'
     | '/listings/new'
     | '/listings/$id/edit'
   fileRoutesByTo: FileRoutesByTo
@@ -263,6 +273,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/verification'
     | '/wallet'
+    | '/listing/$id'
     | '/listings/new'
     | '/listings/$id/edit'
   id:
@@ -287,6 +298,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/verification'
     | '/_authenticated/wallet'
+    | '/listing/$id'
     | '/_authenticated/listings/new'
     | '/_authenticated/listings/$id/edit'
   fileRoutesById: FileRoutesById
@@ -299,6 +311,7 @@ export interface RootRouteChildren {
   MarketplaceRoute: typeof MarketplaceRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SellRoute: typeof SellRoute
+  ListingIdRoute: typeof ListingIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -350,6 +363,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/listing/$id': {
+      id: '/listing/$id'
+      path: '/listing/$id'
+      fullPath: '/listing/$id'
+      preLoaderRoute: typeof ListingIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/wallet': {
@@ -518,6 +538,7 @@ const rootRouteChildren: RootRouteChildren = {
   MarketplaceRoute: MarketplaceRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SellRoute: SellRoute,
+  ListingIdRoute: ListingIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
