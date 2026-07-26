@@ -16,6 +16,7 @@ import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SellerIdRouteImport } from './routes/seller.$id'
 import { Route as ListingIdRouteImport } from './routes/listing.$id'
 import { Route as AuthenticatedWalletRouteImport } from './routes/_authenticated/wallet'
 import { Route as AuthenticatedVerificationRouteImport } from './routes/_authenticated/verification'
@@ -65,6 +66,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SellerIdRoute = SellerIdRouteImport.update({
+  id: '/seller/$id',
+  path: '/seller/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ListingIdRoute = ListingIdRouteImport.update({
@@ -174,6 +180,7 @@ export interface FileRoutesByFullPath {
   '/verification': typeof AuthenticatedVerificationRoute
   '/wallet': typeof AuthenticatedWalletRoute
   '/listing/$id': typeof ListingIdRoute
+  '/seller/$id': typeof SellerIdRoute
   '/listings/new': typeof AuthenticatedListingsNewRoute
   '/listings/$id/edit': typeof AuthenticatedListingsIdEditRoute
 }
@@ -198,6 +205,7 @@ export interface FileRoutesByTo {
   '/verification': typeof AuthenticatedVerificationRoute
   '/wallet': typeof AuthenticatedWalletRoute
   '/listing/$id': typeof ListingIdRoute
+  '/seller/$id': typeof SellerIdRoute
   '/listings/new': typeof AuthenticatedListingsNewRoute
   '/listings/$id/edit': typeof AuthenticatedListingsIdEditRoute
 }
@@ -224,6 +232,7 @@ export interface FileRoutesById {
   '/_authenticated/verification': typeof AuthenticatedVerificationRoute
   '/_authenticated/wallet': typeof AuthenticatedWalletRoute
   '/listing/$id': typeof ListingIdRoute
+  '/seller/$id': typeof SellerIdRoute
   '/_authenticated/listings/new': typeof AuthenticatedListingsNewRoute
   '/_authenticated/listings/$id/edit': typeof AuthenticatedListingsIdEditRoute
 }
@@ -250,6 +259,7 @@ export interface FileRouteTypes {
     | '/verification'
     | '/wallet'
     | '/listing/$id'
+    | '/seller/$id'
     | '/listings/new'
     | '/listings/$id/edit'
   fileRoutesByTo: FileRoutesByTo
@@ -274,6 +284,7 @@ export interface FileRouteTypes {
     | '/verification'
     | '/wallet'
     | '/listing/$id'
+    | '/seller/$id'
     | '/listings/new'
     | '/listings/$id/edit'
   id:
@@ -299,6 +310,7 @@ export interface FileRouteTypes {
     | '/_authenticated/verification'
     | '/_authenticated/wallet'
     | '/listing/$id'
+    | '/seller/$id'
     | '/_authenticated/listings/new'
     | '/_authenticated/listings/$id/edit'
   fileRoutesById: FileRoutesById
@@ -312,6 +324,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SellRoute: typeof SellRoute
   ListingIdRoute: typeof ListingIdRoute
+  SellerIdRoute: typeof SellerIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -363,6 +376,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/seller/$id': {
+      id: '/seller/$id'
+      path: '/seller/$id'
+      fullPath: '/seller/$id'
+      preLoaderRoute: typeof SellerIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/listing/$id': {
@@ -539,6 +559,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SellRoute: SellRoute,
   ListingIdRoute: ListingIdRoute,
+  SellerIdRoute: SellerIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
