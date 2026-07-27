@@ -50,13 +50,30 @@ export function ListingForm({ initial, initialMedia, onSaved }: Props) {
     mileage: initial?.mileage ? String(initial.mileage) : "",
     fuel: initial?.fuel ?? "",
     transmission: initial?.transmission ?? "",
-    seller_phone: initial?.seller_phone ?? "",
-    seller_email: initial?.seller_email ?? "",
+    seller_phone: "",
+    seller_email: "",
   });
   const [media, setMedia] = useState<Media[]>([]);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
+
+  // Load private contact info for edit mode
+  useEffect(() => {
+    if (!initial?.id) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("listing_contacts")
+        .select("seller_phone, seller_email")
+        .eq("listing_id", initial.id)
+        .maybeSingle();
+      if (!cancelled && data) {
+        setForm((f) => ({ ...f, seller_phone: data.seller_phone ?? "", seller_email: data.seller_email ?? "" }));
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [initial?.id]);
 
   useEffect(() => {
     let cancelled = false;

@@ -154,7 +154,7 @@ function Stat({ label, value, hint, href }: { label: string; value: number | str
 
 function calcCompletion(p: Profile | null | undefined): number {
   if (!p) return 0;
-  const fields: (keyof Profile)[] = ["full_name", "username", "phone", "country", "city", "biography", "avatar_url"];
+  const fields: (keyof Profile)[] = ["full_name", "username", "country", "city", "biography", "avatar_url"];
   const filled = fields.filter((f) => !!p[f]).length;
   return Math.round((filled / fields.length) * 100);
 }

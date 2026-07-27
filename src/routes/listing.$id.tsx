@@ -289,13 +289,7 @@ function ListingDetail() {
                 </p>
               </div>
 
-              {l.seller_email || l.seller_phone ? (
-                <div className="glass rounded-2xl p-5 border border-white/10">
-                  <p className="text-xs uppercase tracking-widest text-silver/60">Seller contact</p>
-                  {l.seller_email && <p className="mt-2 text-sm break-words">✉ {l.seller_email}</p>}
-                  {l.seller_phone && <p className="text-sm">☎ {l.seller_phone}</p>}
-                </div>
-              ) : null}
+              {isOwner ? <OwnerContactCard listingId={l.id} /> : null}
             </aside>
           </div>
         )}
