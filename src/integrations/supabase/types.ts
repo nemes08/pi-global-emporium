@@ -75,6 +75,41 @@ export type Database = {
           },
         ]
       }
+      listing_contacts: {
+        Row: {
+          created_at: string
+          listing_id: string
+          seller_email: string | null
+          seller_id: string
+          seller_phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          listing_id: string
+          seller_email?: string | null
+          seller_id: string
+          seller_phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          listing_id?: string
+          seller_email?: string | null
+          seller_id?: string
+          seller_phone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listing_contacts_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: true
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       listing_media: {
         Row: {
           created_at: string
@@ -130,9 +165,7 @@ export type Database = {
           negotiable: boolean
           price_usd: number
           pricing_mode: string
-          seller_email: string | null
           seller_id: string
-          seller_phone: string | null
           status: Database["public"]["Enums"]["listing_status"]
           title: string
           transmission: string | null
@@ -156,9 +189,7 @@ export type Database = {
           negotiable?: boolean
           price_usd?: number
           pricing_mode?: string
-          seller_email?: string | null
           seller_id: string
-          seller_phone?: string | null
           status?: Database["public"]["Enums"]["listing_status"]
           title: string
           transmission?: string | null
@@ -182,9 +213,7 @@ export type Database = {
           negotiable?: boolean
           price_usd?: number
           pricing_mode?: string
-          seller_email?: string | null
           seller_id?: string
-          seller_phone?: string | null
           status?: Database["public"]["Enums"]["listing_status"]
           title?: string
           transmission?: string | null
@@ -471,7 +500,45 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_profiles: {
+        Row: {
+          avatar_url: string | null
+          biography: string | null
+          city: string | null
+          country: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string | null
+          join_date: string | null
+          username: string | null
+          verified: boolean | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          biography?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string | null
+          join_date?: string | null
+          username?: string | null
+          verified?: boolean | null
+        }
+        Update: {
+          avatar_url?: string | null
+          biography?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string | null
+          join_date?: string | null
+          username?: string | null
+          verified?: boolean | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
