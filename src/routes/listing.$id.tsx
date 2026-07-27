@@ -289,13 +289,7 @@ function ListingDetail() {
                 </p>
               </div>
 
-              {l.seller_email || l.seller_phone ? (
-                <div className="glass rounded-2xl p-5 border border-white/10">
-                  <p className="text-xs uppercase tracking-widest text-silver/60">Seller contact</p>
-                  {l.seller_email && <p className="mt-2 text-sm break-words">✉ {l.seller_email}</p>}
-                  {l.seller_phone && <p className="text-sm">☎ {l.seller_phone}</p>}
-                </div>
-              ) : null}
+              {isOwner ? <OwnerContactCard listingId={l.id} /> : null}
             </aside>
           </div>
         )}
@@ -315,6 +309,28 @@ function Field({ k, v }: { k: string; v: string | number }) {
     <div className="flex items-center justify-between border-b border-white/5 py-1.5">
       <dt className="text-silver/60">{k}</dt>
       <dd className="text-silver">{v}</dd>
+    </div>
+  );
+}
+
+function OwnerContactCard({ listingId }: { listingId: string }) {
+  const { data } = useQuery({
+    queryKey: ["listing-contact", listingId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("listing_contacts")
+        .select("seller_phone, seller_email")
+        .eq("listing_id", listingId)
+        .maybeSingle();
+      return data;
+    },
+  });
+  if (!data?.seller_email && !data?.seller_phone) return null;
+  return (
+    <div className="glass rounded-2xl p-5 border border-white/10">
+      <p className="text-xs uppercase tracking-widest text-silver/60">Your contact info (private)</p>
+      {data.seller_email && <p className="mt-2 text-sm break-words">✉ {data.seller_email}</p>}
+      {data.seller_phone && <p className="text-sm">☎ {data.seller_phone}</p>}
     </div>
   );
 }

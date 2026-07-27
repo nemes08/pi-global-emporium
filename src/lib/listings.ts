@@ -22,8 +22,6 @@ export type ListingRow = {
   mileage: number | null;
   fuel: string | null;
   transmission: string | null;
-  seller_phone: string | null;
-  seller_email: string | null;
   cover_image: string | null;
   status: ListingStatus;
   views_count: number;

@@ -75,6 +75,41 @@ export type Database = {
           },
         ]
       }
+      listing_contacts: {
+        Row: {
+          created_at: string
+          listing_id: string
+          seller_email: string | null
+          seller_id: string
+          seller_phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          listing_id: string
+          seller_email?: string | null
+          seller_id: string
+          seller_phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          listing_id?: string
+          seller_email?: string | null
+          seller_id?: string
+          seller_phone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listing_contacts_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: true
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       listing_media: {
         Row: {
           created_at: string
@@ -130,9 +165,7 @@ export type Database = {
           negotiable: boolean
           price_usd: number
           pricing_mode: string
-          seller_email: string | null
           seller_id: string
-          seller_phone: string | null
           status: Database["public"]["Enums"]["listing_status"]
           title: string
           transmission: string | null
@@ -156,9 +189,7 @@ export type Database = {
           negotiable?: boolean
           price_usd?: number
           pricing_mode?: string
-          seller_email?: string | null
           seller_id: string
-          seller_phone?: string | null
           status?: Database["public"]["Enums"]["listing_status"]
           title: string
           transmission?: string | null
@@ -182,9 +213,7 @@ export type Database = {
           negotiable?: boolean
           price_usd?: number
           pricing_mode?: string
-          seller_email?: string | null
           seller_id?: string
-          seller_phone?: string | null
           status?: Database["public"]["Enums"]["listing_status"]
           title?: string
           transmission?: string | null
@@ -353,6 +382,30 @@ export type Database = {
           },
         ]
       }
+      profile_contacts: {
+        Row: {
+          created_at: string
+          email: string | null
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -361,12 +414,10 @@ export type Database = {
           country: string | null
           created_at: string
           currency: string | null
-          email: string | null
           full_name: string | null
           id: string
           join_date: string
           language: string | null
-          phone: string | null
           updated_at: string
           username: string | null
           verified: boolean
@@ -378,12 +429,10 @@ export type Database = {
           country?: string | null
           created_at?: string
           currency?: string | null
-          email?: string | null
           full_name?: string | null
           id: string
           join_date?: string
           language?: string | null
-          phone?: string | null
           updated_at?: string
           username?: string | null
           verified?: boolean
@@ -395,12 +444,10 @@ export type Database = {
           country?: string | null
           created_at?: string
           currency?: string | null
-          email?: string | null
           full_name?: string | null
           id?: string
           join_date?: string
           language?: string | null
-          phone?: string | null
           updated_at?: string
           username?: string | null
           verified?: boolean

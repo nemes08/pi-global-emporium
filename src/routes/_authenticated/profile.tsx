@@ -21,6 +21,8 @@ export const Route = createFileRoute("/_authenticated/profile")({
 function ProfilePage() {
   const qc = useQueryClient();
   const [form, setForm] = useState<Partial<Profile>>({});
+  const [phone, setPhone] = useState<string>("");
+  const [contactEmail, setContactEmail] = useState<string>("");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -31,8 +33,17 @@ function ProfilePage() {
     queryFn: async (): Promise<Profile | null> => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return null;
-      const { data } = await supabase.from("profiles").select("*").eq("id", u.user.id).maybeSingle();
-      return data as Profile | null;
+      const [{ data: p }, { data: c }] = await Promise.all([
+        supabase.from("profiles").select("*").eq("id", u.user.id).maybeSingle(),
+        supabase.from("profile_contacts").select("phone, email").eq("user_id", u.user.id).maybeSingle(),
+      ]);
+      if (c) {
+        setPhone(c.phone ?? "");
+        setContactEmail(c.email ?? u.user.email ?? "");
+      } else {
+        setContactEmail(u.user.email ?? "");
+      }
+      return p as Profile | null;
     },
   });
 
@@ -57,7 +68,6 @@ function ProfilePage() {
       const patch = {
         full_name: form.full_name ?? null,
         username: form.username ?? null,
-        phone: form.phone ?? null,
         country: form.country ?? null,
         city: form.city ?? null,
         language: form.language ?? null,
@@ -66,6 +76,12 @@ function ProfilePage() {
       };
       const { error } = await supabase.from("profiles").update(patch).eq("id", u.user.id);
       if (error) throw error;
+      const { error: cErr } = await supabase.from("profile_contacts").upsert({
+        user_id: u.user.id,
+        phone: phone || null,
+        email: contactEmail || u.user.email || null,
+      });
+      if (cErr) throw cErr;
       await qc.invalidateQueries({ queryKey: ["me-profile"] });
       setMsg("Profile saved");
     } catch (e: unknown) {
@@ -118,8 +134,8 @@ function ProfilePage() {
         <div className="grid gap-4 sm:grid-cols-2">
           <F label="Full name" value={form.full_name ?? ""} onChange={(v) => setForm({ ...form, full_name: v })} />
           <F label="Username" value={form.username ?? ""} onChange={(v) => setForm({ ...form, username: v })} />
-          <F label="Email" value={profile?.email ?? ""} onChange={() => {}} disabled />
-          <F label="Phone" value={form.phone ?? ""} onChange={(v) => setForm({ ...form, phone: v })} />
+          <F label="Email" value={contactEmail} onChange={setContactEmail} disabled />
+          <F label="Phone" value={phone} onChange={setPhone} />
           <F label="Country" value={form.country ?? ""} onChange={(v) => setForm({ ...form, country: v })} />
           <F label="City" value={form.city ?? ""} onChange={(v) => setForm({ ...form, city: v })} />
           <label className="block">
