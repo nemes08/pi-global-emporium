@@ -51,8 +51,18 @@ function Home() {
             </div>
           </div>
           {featured.length === 0 ? (
-            <div className="glass rounded-2xl p-10 text-center text-muted-foreground border border-white/10">
-              No featured listings yet — check back soon.
+            <div className="glass rounded-3xl border border-white/10 p-12 text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-gold/30 bg-gradient-to-br from-gold/20 to-transparent text-3xl">✨</div>
+              <h3 className="mt-5 font-display text-2xl text-white">No listings available yet</h3>
+              <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+                Be the first to publish a premium listing and reach verified buyers worldwide.
+              </p>
+              <button
+                onClick={() => navigate({ to: "/sell" })}
+                className="btn-gold mt-6 rounded-full px-6 py-2.5 text-xs"
+              >
+                Publish a listing
+              </button>
             </div>
           ) : (
             <FeaturedCarousel items={featured} />
