@@ -69,7 +69,7 @@ function Marketplace() {
             <p className="mt-2 text-sm text-muted-foreground">{t("featured.subtitle")}</p>
           </div>
           <p className="text-xs text-silver/60">
-            {isLoading ? "Loading…" : `${count} ${count === 1 ? "listing" : "listings"}`}
+            {isLoading ? "Loading listings…" : `${count} ${count === 1 ? "listing" : "listings"}`}
           </p>
         </div>
 
@@ -130,8 +130,18 @@ function Marketplace() {
             ))}
           </div>
         ) : count === 0 ? (
-          <div className="glass mt-8 rounded-2xl p-10 text-center text-muted-foreground border border-white/10">
-            No listings match your filters. Try broadening your search.
+          <div className="glass mt-8 rounded-3xl border border-white/10 p-12 text-center">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-gold/30 bg-gradient-to-br from-gold/20 to-transparent text-3xl">🔎</div>
+            <h3 className="mt-5 font-display text-2xl text-white">No listings match your filters</h3>
+            <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+              Try broadening the search — remove a filter, expand the price range, or explore a different category.
+            </p>
+            <button
+              onClick={() => { setFilters(emptyFilters); setSort("featured"); }}
+              className="btn-gold mt-6 rounded-full px-6 py-2.5 text-xs"
+            >
+              Clear all filters
+            </button>
           </div>
         ) : (
           <div className={

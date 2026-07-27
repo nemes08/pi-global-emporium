@@ -39,9 +39,10 @@ export type ListingMediaRow = {
   created_at: string;
 };
 
-/** Sign a listing media storage path to a temporary URL. */
+/** Sign a listing media storage path to a temporary URL. Passes through absolute URLs. */
 export async function signMediaUrl(path: string | null | undefined, expires = 3600): Promise<string | null> {
   if (!path) return null;
+  if (/^https?:\/\//i.test(path)) return path;
   const { data } = await supabase.storage.from("listings").createSignedUrl(path, expires);
   return data?.signedUrl ?? null;
 }
