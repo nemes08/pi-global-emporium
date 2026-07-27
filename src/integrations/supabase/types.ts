@@ -382,6 +382,30 @@ export type Database = {
           },
         ]
       }
+      profile_contacts: {
+        Row: {
+          created_at: string
+          email: string | null
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -390,12 +414,10 @@ export type Database = {
           country: string | null
           created_at: string
           currency: string | null
-          email: string | null
           full_name: string | null
           id: string
           join_date: string
           language: string | null
-          phone: string | null
           updated_at: string
           username: string | null
           verified: boolean
@@ -407,12 +429,10 @@ export type Database = {
           country?: string | null
           created_at?: string
           currency?: string | null
-          email?: string | null
           full_name?: string | null
           id: string
           join_date?: string
           language?: string | null
-          phone?: string | null
           updated_at?: string
           username?: string | null
           verified?: boolean
@@ -424,12 +444,10 @@ export type Database = {
           country?: string | null
           created_at?: string
           currency?: string | null
-          email?: string | null
           full_name?: string | null
           id?: string
           join_date?: string
           language?: string | null
-          phone?: string | null
           updated_at?: string
           username?: string | null
           verified?: boolean
@@ -500,45 +518,7 @@ export type Database = {
       }
     }
     Views: {
-      public_profiles: {
-        Row: {
-          avatar_url: string | null
-          biography: string | null
-          city: string | null
-          country: string | null
-          created_at: string | null
-          full_name: string | null
-          id: string | null
-          join_date: string | null
-          username: string | null
-          verified: boolean | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          biography?: string | null
-          city?: string | null
-          country?: string | null
-          created_at?: string | null
-          full_name?: string | null
-          id?: string | null
-          join_date?: string | null
-          username?: string | null
-          verified?: boolean | null
-        }
-        Update: {
-          avatar_url?: string | null
-          biography?: string | null
-          city?: string | null
-          country?: string | null
-          created_at?: string | null
-          full_name?: string | null
-          id?: string | null
-          join_date?: string | null
-          username?: string | null
-          verified?: boolean | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       [_ in never]: never
