@@ -312,3 +312,25 @@ function Field({ k, v }: { k: string; v: string | number }) {
     </div>
   );
 }
+
+function OwnerContactCard({ listingId }: { listingId: string }) {
+  const { data } = useQuery({
+    queryKey: ["listing-contact", listingId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("listing_contacts")
+        .select("seller_phone, seller_email")
+        .eq("listing_id", listingId)
+        .maybeSingle();
+      return data;
+    },
+  });
+  if (!data?.seller_email && !data?.seller_phone) return null;
+  return (
+    <div className="glass rounded-2xl p-5 border border-white/10">
+      <p className="text-xs uppercase tracking-widest text-silver/60">Your contact info (private)</p>
+      {data.seller_email && <p className="mt-2 text-sm break-words">✉ {data.seller_email}</p>}
+      {data.seller_phone && <p className="text-sm">☎ {data.seller_phone}</p>}
+    </div>
+  );
+}
