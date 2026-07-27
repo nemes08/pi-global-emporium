@@ -1,16 +1,19 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
-import { CATEGORIES } from "@/lib/catalog";
 
 export const Route = createFileRoute("/sell")({
   head: () => ({
     meta: [
       { title: "Sell on Pi Global Marketplace" },
-      { name: "description", content: "List your product globally and get paid in Pi. Reach verified buyers across 180+ countries." },
+      { name: "description", content: "List your product globally and get paid in Pi. Reach verified buyers across 180+ countries with premium tools, photos and video." },
       { property: "og:title", content: "Sell on Pi Global Marketplace" },
       { property: "og:description", content: "List globally. Get paid in Pi." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Sell,
@@ -18,61 +21,59 @@ export const Route = createFileRoute("/sell")({
 
 function Sell() {
   const { t } = useI18n();
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  // Signed-in users go straight to the full listing wizard.
+  useEffect(() => {
+    if (!loading && user) navigate({ to: "/listings/new" });
+  }, [loading, user, navigate]);
+
   return (
     <>
       <Navbar />
-      <main className="mx-auto max-w-3xl px-4 py-14 sm:px-6">
-        <h1 className="font-display text-4xl sm:text-5xl text-gradient-gold">{t("hero.sell")}</h1>
-        <p className="mt-3 text-sm text-muted-foreground">
-          Create a premium listing in minutes. Priced in Pi, visible worldwide.
-        </p>
+      <main className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
+        <div className="glass-strong rounded-3xl border border-gold/20 p-8 shadow-[var(--shadow-luxe)] sm:p-12">
+          <span className="text-[10px] uppercase tracking-widest text-gold">✦ Sell on Pi</span>
+          <h1 className="mt-2 font-display text-4xl sm:text-5xl text-gradient-gold">{t("hero.sell")}</h1>
+          <p className="mt-4 max-w-2xl text-sm text-muted-foreground">
+            Create a premium global listing in minutes. Upload high-resolution photos and video,
+            set your price in Pi with the Community GCV reference, and reach verified buyers worldwide.
+          </p>
 
-        <form className="glass-strong mt-8 space-y-5 rounded-3xl p-6 shadow-[var(--shadow-luxe)]" onSubmit={(e) => { e.preventDefault(); alert("Listing submitted for review."); }}>
-          <Field label="Title">
-            <input required className="input" placeholder="e.g. Porsche 911 Turbo S" />
-          </Field>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label={t("search.category")}>
-              <select required className="input">
-                <option value="">—</option>
-                {CATEGORIES.map((c) => <option key={c.key} value={c.key} className="bg-onyx">{t(`cat.${c.key}`)}</option>)}
-              </select>
-            </Field>
-            <Field label={`${t("search.price")} (USD)`}>
-              <input required type="number" step="0.01" min="0" className="input" placeholder="e.g. 100000" />
-            </Field>
-            <Field label={t("search.country")}><input className="input" /></Field>
-            <Field label={t("search.city")}><input className="input" /></Field>
+          <ul className="mt-8 grid gap-3 sm:grid-cols-2">
+            {[
+              ["Unlimited photos + optional video", "Showcase your product like a boutique dealer."],
+              ["Priced in Pi with Community GCV", "Auto-converts to USD, EUR and TRY."],
+              ["10+ categories", "Vehicles, real estate, luxury, art, marine & more."],
+              ["Verified seller trust", "Verified badge boosts buyer confidence."],
+            ].map(([title, body]) => (
+              <li key={title} className="glass rounded-2xl border border-white/10 p-4">
+                <div className="font-display text-sm text-white">{title}</div>
+                <div className="mt-1 text-xs text-silver/70">{body}</div>
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+            <Link
+              to="/auth"
+              className="btn-gold rounded-full px-8 py-3 text-center text-sm"
+            >
+              Sign in to publish
+            </Link>
+            <Link
+              to="/marketplace"
+              className="btn-ghost-silver rounded-full px-8 py-3 text-center text-sm"
+            >
+              Browse marketplace
+            </Link>
           </div>
-          <Field label="Description">
-            <textarea rows={4} className="input" />
-          </Field>
-          <button className="btn-gold w-full rounded-full px-6 py-3 text-sm">Publish Listing</button>
-          <p className="text-[10px] text-muted-foreground/80">{t("price.disclaimer")}</p>
-        </form>
+
+          <p className="mt-6 text-[10px] text-muted-foreground/80">{t("price.disclaimer")}</p>
+        </div>
       </main>
       <Footer />
-      <style>{`
-        .input {
-          width: 100%;
-          border-radius: 0.75rem;
-          border: 1px solid oklch(1 0 0 / 0.10);
-          background: rgba(0,0,0,0.4);
-          padding: 0.65rem 0.9rem;
-          color: var(--silver);
-          outline: none;
-        }
-        .input:focus { border-color: oklch(0.82 0.14 85 / 0.6); box-shadow: 0 0 0 3px oklch(0.82 0.14 85 / 0.2); }
-      `}</style>
     </>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="block">
-      <span className="mb-1 block text-[10px] uppercase tracking-widest text-muted-foreground">{label}</span>
-      {children}
-    </label>
   );
 }
