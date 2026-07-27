@@ -131,10 +131,10 @@ export function ListingForm({ initial, initialMedia, onSaved }: Props) {
         seller_email: form.seller_email || null,
       });
 
+      const { seller_phone, seller_email, ...listingFields } = parsed;
       const payload = {
         seller_id: u.user.id,
-        ...parsed,
-        seller_email: parsed.seller_email || null,
+        ...listingFields,
         pricing_mode: mode,
         status,
       };
@@ -149,6 +149,14 @@ export function ListingForm({ initial, initialMedia, onSaved }: Props) {
         listingId = data.id;
       }
       if (!listingId) throw new Error("Failed to save listing");
+
+      // Upsert private seller contact info
+      await supabase.from("listing_contacts").upsert({
+        listing_id: listingId,
+        seller_id: u.user.id,
+        seller_phone: seller_phone || null,
+        seller_email: (seller_email as string | null) || null,
+      });
 
       // Upload new media
       const newFiles = media.filter((m) => m.isNew && m.file);

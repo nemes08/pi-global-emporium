@@ -6,8 +6,6 @@ export type Profile = {
   id: string;
   full_name: string | null;
   username: string | null;
-  email: string | null;
-  phone: string | null;
   country: string | null;
   city: string | null;
   language: string | null;
