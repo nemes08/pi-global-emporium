@@ -414,10 +414,14 @@ export type Database = {
           country: string | null
           created_at: string
           currency: string | null
+          dealer_tier: string
           full_name: string | null
           id: string
           join_date: string
           language: string | null
+          pi_sandbox: boolean
+          pi_uid: string | null
+          pi_username: string | null
           updated_at: string
           username: string | null
           verified: boolean
@@ -429,10 +433,14 @@ export type Database = {
           country?: string | null
           created_at?: string
           currency?: string | null
+          dealer_tier?: string
           full_name?: string | null
           id: string
           join_date?: string
           language?: string | null
+          pi_sandbox?: boolean
+          pi_uid?: string | null
+          pi_username?: string | null
           updated_at?: string
           username?: string | null
           verified?: boolean
@@ -444,10 +452,14 @@ export type Database = {
           country?: string | null
           created_at?: string
           currency?: string | null
+          dealer_tier?: string
           full_name?: string | null
           id?: string
           join_date?: string
           language?: string | null
+          pi_sandbox?: boolean
+          pi_uid?: string | null
+          pi_username?: string | null
           updated_at?: string
           username?: string | null
           verified?: boolean
@@ -476,6 +488,47 @@ export type Database = {
             columns: ["listing_id"]
             isOneToOne: false
             referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          buyer_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          order_id: string | null
+          rating: number
+          seller_id: string
+          updated_at: string
+        }
+        Insert: {
+          buyer_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          rating: number
+          seller_id: string
+          updated_at?: string
+        }
+        Update: {
+          buyer_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          rating?: number
+          seller_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
             referencedColumns: ["id"]
           },
         ]

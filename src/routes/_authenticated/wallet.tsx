@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AccountLayout } from "@/components/AccountLayout";
+import { PiConnectCard } from "@/components/PiConnectCard";
 import { GCV_USD_PER_PI, usePricing } from "@/lib/pricing";
 
 export const Route = createFileRoute("/_authenticated/wallet")({
@@ -36,23 +37,21 @@ function WalletPage() {
   return (
     <AccountLayout title="Wallet Overview">
       <div className="grid gap-4 md:grid-cols-2">
+        <PiConnectCard />
+
         <div className="glass-strong rounded-3xl p-6 border border-gold/30 relative overflow-hidden">
           <div className="absolute inset-0 pointer-events-none opacity-20 bg-gradient-to-br from-gold/40 via-transparent to-transparent" />
           <div className="relative">
-            <p className="text-xs uppercase tracking-widest text-gold">Pi Wallet</p>
+            <p className="text-xs uppercase tracking-widest text-gold">Balance</p>
             <p className="font-display text-4xl text-gradient-gold mt-2">— π</p>
-            <p className="text-xs text-silver/60 mt-1">Connect Pi Wallet in the Pi Browser to see your live balance.</p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <button className="btn-gold rounded-full px-4 py-2 text-xs">Connect Pi Wallet</button>
-              <a href="https://minepi.com/download/" target="_blank" rel="noreferrer" className="btn-ghost-silver rounded-full px-4 py-2 text-xs">Get Pi Browser</a>
-            </div>
+            <p className="mt-1 text-xs text-silver/60">Live balance activates once the Pi Wallet is connected in the Pi Browser.</p>
             <p className="mt-4 text-[10px] text-silver/50">
               Rate: 1 π = ${usdPerPi.toLocaleString()} USD ({mode === "gcv" ? "GCV community reference" : "Exchange market value"})
             </p>
           </div>
         </div>
 
-        <div className="glass rounded-2xl p-6 border border-white/10">
+        <div className="glass rounded-2xl p-6 border border-white/10 md:col-span-2">
           <p className="text-xs uppercase tracking-widest text-silver/60">Marketplace activity</p>
           <ul className="mt-3 space-y-3 text-sm">
             <Row label="Total spent" value={`$${(data?.spent ?? 0).toLocaleString()}`} sub={`${((data?.spent ?? 0) / usdPerPi).toLocaleString(undefined, { maximumFractionDigits: 5 })} π`} />
