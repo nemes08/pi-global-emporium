@@ -6,7 +6,7 @@ import { usePricing } from "@/lib/pricing";
 import { signMediaUrl } from "@/lib/listings";
 import type { MarketplaceItem } from "@/lib/marketplace";
 import { CATEGORY_LABELS, type CategoryKey } from "@/lib/catalog";
-import { VerifiedBadge } from "./VerifiedBadge";
+import { DealerBadge } from "./DealerBadge";
 
 export function MarketplaceCard({ item }: { item: MarketplaceItem }) {
   const { listing: l, seller } = item;
@@ -51,7 +51,7 @@ export function MarketplaceCard({ item }: { item: MarketplaceItem }) {
         )}
         <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-3">
           <span className="glass rounded-full px-2.5 py-1 text-[10px] uppercase tracking-widest text-silver">{cat}</span>
-          {seller?.verified && <VerifiedBadge compact />}
+          {seller && <DealerBadge tier={seller.dealer_tier} verified={seller.verified} variant="compact" />}
         </div>
         <button
           onClick={toggleFav}
@@ -87,7 +87,7 @@ export function MarketplaceCard({ item }: { item: MarketplaceItem }) {
             <span className="truncate">
               {seller.full_name ?? seller.username ?? "Seller"}
             </span>
-            {seller.verified && <span className="text-gold">✓</span>}
+            {seller.verified && <span className="text-gold" aria-hidden>✓</span>}
           </div>
         )}
       </div>

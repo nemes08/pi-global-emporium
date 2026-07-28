@@ -39,6 +39,7 @@ export type SellerLite = {
   username: string | null;
   avatar_url: string | null;
   verified: boolean;
+  dealer_tier: string | null;
 };
 
 export type MarketplaceItem = {
@@ -90,7 +91,7 @@ export async function fetchMarketplace(
   if (sellerIds.length) {
     const { data: pData } = await supabase
       .from("profiles")
-      .select("id, full_name, username, avatar_url, verified")
+      .select("id, full_name, username, avatar_url, verified, dealer_tier")
       .in("id", sellerIds)
       .returns<SellerLite[]>();
     sellers = pData ?? [];
