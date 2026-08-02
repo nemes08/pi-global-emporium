@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /escrow
+Disallow: /settings
+Disallow: /profile
+Disallow: /messages
+Disallow: /notifications
+Disallow: /orders
+Disallow: /offers
+Disallow: /wallet

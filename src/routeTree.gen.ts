@@ -39,6 +39,7 @@ import { Route as AuthenticatedAdminVerificationRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated/admin.orders'
 import { Route as AuthenticatedAdminModerationRouteImport } from './routes/_authenticated/admin.moderation'
+import { Route as AuthenticatedAdminLogsRouteImport } from './routes/_authenticated/admin.logs'
 import { Route as AuthenticatedAdminListingsRouteImport } from './routes/_authenticated/admin.listings'
 import { Route as AuthenticatedListingsIdEditRouteImport } from './routes/_authenticated/listings.$id.edit'
 
@@ -198,6 +199,11 @@ const AuthenticatedAdminModerationRoute =
     path: '/moderation',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminLogsRoute = AuthenticatedAdminLogsRouteImport.update({
+  id: '/logs',
+  path: '/logs',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminListingsRoute =
   AuthenticatedAdminListingsRouteImport.update({
     id: '/listings',
@@ -236,6 +242,7 @@ export interface FileRoutesByFullPath {
   '/listing/$id': typeof ListingIdRoute
   '/seller/$id': typeof SellerIdRoute
   '/admin/listings': typeof AuthenticatedAdminListingsRoute
+  '/admin/logs': typeof AuthenticatedAdminLogsRoute
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -268,6 +275,7 @@ export interface FileRoutesByTo {
   '/listing/$id': typeof ListingIdRoute
   '/seller/$id': typeof SellerIdRoute
   '/admin/listings': typeof AuthenticatedAdminListingsRoute
+  '/admin/logs': typeof AuthenticatedAdminLogsRoute
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -303,6 +311,7 @@ export interface FileRoutesById {
   '/listing/$id': typeof ListingIdRoute
   '/seller/$id': typeof SellerIdRoute
   '/_authenticated/admin/listings': typeof AuthenticatedAdminListingsRoute
+  '/_authenticated/admin/logs': typeof AuthenticatedAdminLogsRoute
   '/_authenticated/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -338,6 +347,7 @@ export interface FileRouteTypes {
     | '/listing/$id'
     | '/seller/$id'
     | '/admin/listings'
+    | '/admin/logs'
     | '/admin/moderation'
     | '/admin/orders'
     | '/admin/users'
@@ -370,6 +380,7 @@ export interface FileRouteTypes {
     | '/listing/$id'
     | '/seller/$id'
     | '/admin/listings'
+    | '/admin/logs'
     | '/admin/moderation'
     | '/admin/orders'
     | '/admin/users'
@@ -404,6 +415,7 @@ export interface FileRouteTypes {
     | '/listing/$id'
     | '/seller/$id'
     | '/_authenticated/admin/listings'
+    | '/_authenticated/admin/logs'
     | '/_authenticated/admin/moderation'
     | '/_authenticated/admin/orders'
     | '/_authenticated/admin/users'
@@ -637,6 +649,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminModerationRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/logs': {
+      id: '/_authenticated/admin/logs'
+      path: '/logs'
+      fullPath: '/admin/logs'
+      preLoaderRoute: typeof AuthenticatedAdminLogsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/listings': {
       id: '/_authenticated/admin/listings'
       path: '/listings'
@@ -656,6 +675,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminListingsRoute: typeof AuthenticatedAdminListingsRoute
+  AuthenticatedAdminLogsRoute: typeof AuthenticatedAdminLogsRoute
   AuthenticatedAdminModerationRoute: typeof AuthenticatedAdminModerationRoute
   AuthenticatedAdminOrdersRoute: typeof AuthenticatedAdminOrdersRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
@@ -665,6 +685,7 @@ interface AuthenticatedAdminRouteChildren {
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminListingsRoute: AuthenticatedAdminListingsRoute,
+  AuthenticatedAdminLogsRoute: AuthenticatedAdminLogsRoute,
   AuthenticatedAdminModerationRoute: AuthenticatedAdminModerationRoute,
   AuthenticatedAdminOrdersRoute: AuthenticatedAdminOrdersRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
