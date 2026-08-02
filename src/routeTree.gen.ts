@@ -36,6 +36,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedListingsNewRouteImport } from './routes/_authenticated/listings.new'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
+import { Route as AuthenticatedAdminListingsRouteImport } from './routes/_authenticated/admin.listings'
 import { Route as AuthenticatedListingsIdEditRouteImport } from './routes/_authenticated/listings.$id.edit'
 
 const SellRoute = SellRouteImport.update({
@@ -176,6 +177,12 @@ const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAdminListingsRoute =
+  AuthenticatedAdminListingsRouteImport.update({
+    id: '/listings',
+    path: '/listings',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedListingsIdEditRoute =
   AuthenticatedListingsIdEditRouteImport.update({
     id: '/$id/edit',
@@ -207,6 +214,7 @@ export interface FileRoutesByFullPath {
   '/wallet': typeof AuthenticatedWalletRoute
   '/listing/$id': typeof ListingIdRoute
   '/seller/$id': typeof SellerIdRoute
+  '/admin/listings': typeof AuthenticatedAdminListingsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/listings/new': typeof AuthenticatedListingsNewRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -235,6 +243,7 @@ export interface FileRoutesByTo {
   '/wallet': typeof AuthenticatedWalletRoute
   '/listing/$id': typeof ListingIdRoute
   '/seller/$id': typeof SellerIdRoute
+  '/admin/listings': typeof AuthenticatedAdminListingsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/listings/new': typeof AuthenticatedListingsNewRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -266,6 +275,7 @@ export interface FileRoutesById {
   '/_authenticated/wallet': typeof AuthenticatedWalletRoute
   '/listing/$id': typeof ListingIdRoute
   '/seller/$id': typeof SellerIdRoute
+  '/_authenticated/admin/listings': typeof AuthenticatedAdminListingsRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/listings/new': typeof AuthenticatedListingsNewRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -297,6 +307,7 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/listing/$id'
     | '/seller/$id'
+    | '/admin/listings'
     | '/admin/users'
     | '/listings/new'
     | '/admin/'
@@ -325,6 +336,7 @@ export interface FileRouteTypes {
     | '/wallet'
     | '/listing/$id'
     | '/seller/$id'
+    | '/admin/listings'
     | '/admin/users'
     | '/listings/new'
     | '/admin'
@@ -355,6 +367,7 @@ export interface FileRouteTypes {
     | '/_authenticated/wallet'
     | '/listing/$id'
     | '/seller/$id'
+    | '/_authenticated/admin/listings'
     | '/_authenticated/admin/users'
     | '/_authenticated/listings/new'
     | '/_authenticated/admin/'
@@ -564,6 +577,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/listings': {
+      id: '/_authenticated/admin/listings'
+      path: '/listings'
+      fullPath: '/admin/listings'
+      preLoaderRoute: typeof AuthenticatedAdminListingsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/listings/$id/edit': {
       id: '/_authenticated/listings/$id/edit'
       path: '/$id/edit'
@@ -575,11 +595,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminListingsRoute: typeof AuthenticatedAdminListingsRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminListingsRoute: AuthenticatedAdminListingsRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
