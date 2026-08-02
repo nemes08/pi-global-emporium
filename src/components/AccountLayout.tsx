@@ -27,6 +27,7 @@ const NAV_SECTIONS: { title: string; items: NavItem[] }[] = [
   {
     title: "Buying",
     items: [
+      { to: "/escrow", label: "Pi Escrow", icon: "⛨" },
       { to: "/favorites", label: "Favorites", icon: "♥" },
       { to: "/recently-viewed", label: "Recently Viewed", icon: "◔" },
     ],
