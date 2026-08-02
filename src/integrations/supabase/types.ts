@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_logs: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          meta: Json | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          meta?: Json | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          meta?: Json | null
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           buyer_id: string
@@ -45,6 +75,169 @@ export type Database = {
             columns: ["listing_id"]
             isOneToOne: false
             referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      disputes: {
+        Row: {
+          buyer_id: string
+          created_at: string
+          details: string | null
+          escrow_id: string | null
+          id: string
+          opened_by: string
+          order_id: string
+          reason: string
+          resolution: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          seller_id: string
+          status: Database["public"]["Enums"]["dispute_status"]
+          updated_at: string
+        }
+        Insert: {
+          buyer_id: string
+          created_at?: string
+          details?: string | null
+          escrow_id?: string | null
+          id?: string
+          opened_by: string
+          order_id: string
+          reason: string
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          seller_id: string
+          status?: Database["public"]["Enums"]["dispute_status"]
+          updated_at?: string
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string
+          details?: string | null
+          escrow_id?: string | null
+          id?: string
+          opened_by?: string
+          order_id?: string
+          reason?: string
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          seller_id?: string
+          status?: Database["public"]["Enums"]["dispute_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disputes_escrow_id_fkey"
+            columns: ["escrow_id"]
+            isOneToOne: false
+            referencedRelation: "escrows"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disputes_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      escrow_events: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          escrow_id: string
+          id: string
+          note: string | null
+          status: Database["public"]["Enums"]["escrow_status"]
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          escrow_id: string
+          id?: string
+          note?: string | null
+          status: Database["public"]["Enums"]["escrow_status"]
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          escrow_id?: string
+          id?: string
+          note?: string | null
+          status?: Database["public"]["Enums"]["escrow_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "escrow_events_escrow_id_fkey"
+            columns: ["escrow_id"]
+            isOneToOne: false
+            referencedRelation: "escrows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      escrows: {
+        Row: {
+          amount_usd: number
+          buyer_id: string
+          created_at: string
+          delivered_at: string | null
+          funded_at: string | null
+          id: string
+          order_id: string
+          pi_payment_id: string | null
+          pi_tx_id: string | null
+          refunded_at: string | null
+          released_at: string | null
+          seller_id: string
+          shipped_at: string | null
+          status: Database["public"]["Enums"]["escrow_status"]
+          updated_at: string
+        }
+        Insert: {
+          amount_usd?: number
+          buyer_id: string
+          created_at?: string
+          delivered_at?: string | null
+          funded_at?: string | null
+          id?: string
+          order_id: string
+          pi_payment_id?: string | null
+          pi_tx_id?: string | null
+          refunded_at?: string | null
+          released_at?: string | null
+          seller_id: string
+          shipped_at?: string | null
+          status?: Database["public"]["Enums"]["escrow_status"]
+          updated_at?: string
+        }
+        Update: {
+          amount_usd?: number
+          buyer_id?: string
+          created_at?: string
+          delivered_at?: string | null
+          funded_at?: string | null
+          id?: string
+          order_id?: string
+          pi_payment_id?: string | null
+          pi_tx_id?: string | null
+          refunded_at?: string | null
+          released_at?: string | null
+          seller_id?: string
+          shipped_at?: string | null
+          status?: Database["public"]["Enums"]["escrow_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "escrows_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders"
             referencedColumns: ["id"]
           },
         ]
@@ -162,6 +355,8 @@ export type Database = {
           id: string
           mileage: number | null
           model: string | null
+          moderation_note: string | null
+          moderation_status: Database["public"]["Enums"]["moderation_status"]
           negotiable: boolean
           price_usd: number
           pricing_mode: string
@@ -186,6 +381,8 @@ export type Database = {
           id?: string
           mileage?: number | null
           model?: string | null
+          moderation_note?: string | null
+          moderation_status?: Database["public"]["Enums"]["moderation_status"]
           negotiable?: boolean
           price_usd?: number
           pricing_mode?: string
@@ -210,6 +407,8 @@ export type Database = {
           id?: string
           mileage?: number | null
           model?: string | null
+          moderation_note?: string | null
+          moderation_status?: Database["public"]["Enums"]["moderation_status"]
           negotiable?: boolean
           price_usd?: number
           pricing_mode?: string
@@ -492,6 +691,48 @@ export type Database = {
           },
         ]
       }
+      reports: {
+        Row: {
+          created_at: string
+          details: string | null
+          handled_at: string | null
+          handled_by: string | null
+          id: string
+          reason: string
+          reporter_id: string
+          status: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          target_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          handled_at?: string | null
+          handled_by?: string | null
+          id?: string
+          reason: string
+          reporter_id: string
+          status?: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          target_type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          handled_at?: string | null
+          handled_by?: string | null
+          id?: string
+          reason?: string
+          reporter_id?: string
+          status?: Database["public"]["Enums"]["report_status"]
+          target_id?: string
+          target_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           buyer_id: string
@@ -605,7 +846,23 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      dispute_status:
+        | "open"
+        | "under_review"
+        | "resolved_buyer"
+        | "resolved_seller"
+        | "closed"
+      escrow_status:
+        | "awaiting_payment"
+        | "funded"
+        | "shipped"
+        | "delivered"
+        | "released"
+        | "refunded"
+        | "disputed"
+        | "cancelled"
       listing_status: "draft" | "active" | "reserved" | "sold" | "archived"
+      moderation_status: "pending" | "approved" | "rejected"
       offer_status:
         | "pending"
         | "accepted"
@@ -619,6 +876,7 @@ export type Database = {
         | "completed"
         | "cancelled"
         | "refunded"
+      report_status: "open" | "reviewing" | "actioned" | "dismissed"
       verification_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
@@ -748,7 +1006,25 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      dispute_status: [
+        "open",
+        "under_review",
+        "resolved_buyer",
+        "resolved_seller",
+        "closed",
+      ],
+      escrow_status: [
+        "awaiting_payment",
+        "funded",
+        "shipped",
+        "delivered",
+        "released",
+        "refunded",
+        "disputed",
+        "cancelled",
+      ],
       listing_status: ["draft", "active", "reserved", "sold", "archived"],
+      moderation_status: ["pending", "approved", "rejected"],
       offer_status: ["pending", "accepted", "rejected", "withdrawn", "expired"],
       order_status: [
         "pending",
@@ -758,6 +1034,7 @@ export const Constants = {
         "cancelled",
         "refunded",
       ],
+      report_status: ["open", "reviewing", "actioned", "dismissed"],
       verification_status: ["pending", "approved", "rejected"],
     },
   },
