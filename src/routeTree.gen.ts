@@ -35,6 +35,7 @@ import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedListingsNewRouteImport } from './routes/_authenticated/listings.new'
+import { Route as AuthenticatedAdminVerificationRouteImport } from './routes/_authenticated/admin.verification'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated/admin.orders'
 import { Route as AuthenticatedAdminModerationRouteImport } from './routes/_authenticated/admin.moderation'
@@ -174,6 +175,12 @@ const AuthenticatedListingsNewRoute =
     path: '/new',
     getParentRoute: () => AuthenticatedListingsRoute,
   } as any)
+const AuthenticatedAdminVerificationRoute =
+  AuthenticatedAdminVerificationRouteImport.update({
+    id: '/verification',
+    path: '/verification',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
   id: '/users',
   path: '/users',
@@ -232,6 +239,7 @@ export interface FileRoutesByFullPath {
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/admin/verification': typeof AuthenticatedAdminVerificationRoute
   '/listings/new': typeof AuthenticatedListingsNewRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/listings/$id/edit': typeof AuthenticatedListingsIdEditRoute
@@ -263,6 +271,7 @@ export interface FileRoutesByTo {
   '/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/admin/verification': typeof AuthenticatedAdminVerificationRoute
   '/listings/new': typeof AuthenticatedListingsNewRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/listings/$id/edit': typeof AuthenticatedListingsIdEditRoute
@@ -297,6 +306,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/moderation': typeof AuthenticatedAdminModerationRoute
   '/_authenticated/admin/orders': typeof AuthenticatedAdminOrdersRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/_authenticated/admin/verification': typeof AuthenticatedAdminVerificationRoute
   '/_authenticated/listings/new': typeof AuthenticatedListingsNewRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/listings/$id/edit': typeof AuthenticatedListingsIdEditRoute
@@ -331,6 +341,7 @@ export interface FileRouteTypes {
     | '/admin/moderation'
     | '/admin/orders'
     | '/admin/users'
+    | '/admin/verification'
     | '/listings/new'
     | '/admin/'
     | '/listings/$id/edit'
@@ -362,6 +373,7 @@ export interface FileRouteTypes {
     | '/admin/moderation'
     | '/admin/orders'
     | '/admin/users'
+    | '/admin/verification'
     | '/listings/new'
     | '/admin'
     | '/listings/$id/edit'
@@ -395,6 +407,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/moderation'
     | '/_authenticated/admin/orders'
     | '/_authenticated/admin/users'
+    | '/_authenticated/admin/verification'
     | '/_authenticated/listings/new'
     | '/_authenticated/admin/'
     | '/_authenticated/listings/$id/edit'
@@ -596,6 +609,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedListingsNewRouteImport
       parentRoute: typeof AuthenticatedListingsRoute
     }
+    '/_authenticated/admin/verification': {
+      id: '/_authenticated/admin/verification'
+      path: '/verification'
+      fullPath: '/admin/verification'
+      preLoaderRoute: typeof AuthenticatedAdminVerificationRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/users': {
       id: '/_authenticated/admin/users'
       path: '/users'
@@ -639,6 +659,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminModerationRoute: typeof AuthenticatedAdminModerationRoute
   AuthenticatedAdminOrdersRoute: typeof AuthenticatedAdminOrdersRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
+  AuthenticatedAdminVerificationRoute: typeof AuthenticatedAdminVerificationRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
@@ -647,6 +668,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminModerationRoute: AuthenticatedAdminModerationRoute,
   AuthenticatedAdminOrdersRoute: AuthenticatedAdminOrdersRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
+  AuthenticatedAdminVerificationRoute: AuthenticatedAdminVerificationRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 
