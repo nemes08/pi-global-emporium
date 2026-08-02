@@ -29,6 +29,7 @@ import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authen
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedListingsRouteImport } from './routes/_authenticated/listings'
 import { Route as AuthenticatedFavoritesRouteImport } from './routes/_authenticated/favorites'
+import { Route as AuthenticatedEscrowRouteImport } from './routes/_authenticated/escrow'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
 import { Route as AuthenticatedListingsNewRouteImport } from './routes/_authenticated/listings.new'
@@ -136,6 +137,11 @@ const AuthenticatedFavoritesRoute = AuthenticatedFavoritesRouteImport.update({
   path: '/favorites',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedEscrowRoute = AuthenticatedEscrowRouteImport.update({
+  id: '/escrow',
+  path: '/escrow',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -168,6 +174,7 @@ export interface FileRoutesByFullPath {
   '/sell': typeof SellRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/escrow': typeof AuthenticatedEscrowRoute
   '/favorites': typeof AuthenticatedFavoritesRoute
   '/listings': typeof AuthenticatedListingsRouteWithChildren
   '/messages': typeof AuthenticatedMessagesRoute
@@ -193,6 +200,7 @@ export interface FileRoutesByTo {
   '/sell': typeof SellRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/escrow': typeof AuthenticatedEscrowRoute
   '/favorites': typeof AuthenticatedFavoritesRoute
   '/listings': typeof AuthenticatedListingsRouteWithChildren
   '/messages': typeof AuthenticatedMessagesRoute
@@ -220,6 +228,7 @@ export interface FileRoutesById {
   '/sell': typeof SellRoute
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/escrow': typeof AuthenticatedEscrowRoute
   '/_authenticated/favorites': typeof AuthenticatedFavoritesRoute
   '/_authenticated/listings': typeof AuthenticatedListingsRouteWithChildren
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
@@ -247,6 +256,7 @@ export interface FileRouteTypes {
     | '/sell'
     | '/analytics'
     | '/dashboard'
+    | '/escrow'
     | '/favorites'
     | '/listings'
     | '/messages'
@@ -272,6 +282,7 @@ export interface FileRouteTypes {
     | '/sell'
     | '/analytics'
     | '/dashboard'
+    | '/escrow'
     | '/favorites'
     | '/listings'
     | '/messages'
@@ -298,6 +309,7 @@ export interface FileRouteTypes {
     | '/sell'
     | '/_authenticated/analytics'
     | '/_authenticated/dashboard'
+    | '/_authenticated/escrow'
     | '/_authenticated/favorites'
     | '/_authenticated/listings'
     | '/_authenticated/messages'
@@ -469,6 +481,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFavoritesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/escrow': {
+      id: '/_authenticated/escrow'
+      path: '/escrow'
+      fullPath: '/escrow'
+      preLoaderRoute: typeof AuthenticatedEscrowRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -518,6 +537,7 @@ const AuthenticatedListingsRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedEscrowRoute: typeof AuthenticatedEscrowRoute
   AuthenticatedFavoritesRoute: typeof AuthenticatedFavoritesRoute
   AuthenticatedListingsRoute: typeof AuthenticatedListingsRouteWithChildren
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
@@ -534,6 +554,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedEscrowRoute: AuthenticatedEscrowRoute,
   AuthenticatedFavoritesRoute: AuthenticatedFavoritesRoute,
   AuthenticatedListingsRoute: AuthenticatedListingsRouteWithChildren,
   AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
