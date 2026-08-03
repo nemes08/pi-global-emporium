@@ -19,12 +19,12 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-40">
       <div className="glass-strong border-b border-white/10">
-        <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-          <Link to="/" className="flex items-center gap-2 shrink-0">
-            <span className="grid h-9 w-9 place-items-center rounded-full btn-gold text-onyx font-black">π</span>
-            <span className="font-display text-lg sm:text-xl tracking-tight">
+        <nav className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
+          <Link to="/" className="flex min-w-0 items-center gap-2">
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full btn-gold text-onyx font-black">π</span>
+            <span className="truncate font-display text-base tracking-tight sm:text-xl">
               <span className="text-gradient-gold">Pi Global</span>{" "}
-              <span className="text-silver">Marketplace</span>
+              <span className="hidden text-silver xs:inline">Marketplace</span>
             </span>
           </Link>
 
@@ -34,7 +34,8 @@ export function Navbar() {
             <a href="/#categories" className="hover:text-white transition-colors">{t("nav.categories")}</a>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
+
             <select
               aria-label="Language"
               value={lang}
