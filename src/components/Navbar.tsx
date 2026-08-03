@@ -19,12 +19,12 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-40">
       <div className="glass-strong border-b border-white/10">
-        <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-          <Link to="/" className="flex items-center gap-2 shrink-0">
-            <span className="grid h-9 w-9 place-items-center rounded-full btn-gold text-onyx font-black">π</span>
-            <span className="font-display text-lg sm:text-xl tracking-tight">
+        <nav className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
+          <Link to="/" className="flex min-w-0 items-center gap-2">
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full btn-gold text-onyx font-black">π</span>
+            <span className="truncate font-display text-base tracking-tight sm:text-xl">
               <span className="text-gradient-gold">Pi Global</span>{" "}
-              <span className="text-silver">Marketplace</span>
+              <span className="hidden text-silver [@media(min-width:400px)]:inline">Marketplace</span>
             </span>
           </Link>
 
@@ -34,7 +34,8 @@ export function Navbar() {
             <a href="/#categories" className="hover:text-white transition-colors">{t("nav.categories")}</a>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
+
             <select
               aria-label="Language"
               value={lang}
@@ -67,17 +68,20 @@ export function Navbar() {
               </Link>
             )}
             <button
-              className="md:hidden rounded-full border border-white/10 bg-white/5 px-3 py-2 text-silver"
+              className="grid min-h-11 min-w-11 place-items-center rounded-full border border-white/10 bg-white/5 text-silver md:hidden"
               onClick={() => setOpen((v) => !v)}
-              aria-label="Menu"
+              aria-label={open ? "Close menu" : "Open menu"}
+              aria-expanded={open}
+              aria-controls="mobile-nav"
             >
-              ☰
+              <span aria-hidden="true">☰</span>
             </button>
           </div>
         </nav>
 
         {open && (
-          <div className="md:hidden border-t border-white/10 px-4 py-3 space-y-2 text-sm">
+          <div id="mobile-nav" className="md:hidden border-t border-white/10 px-4 py-3 space-y-2 text-sm">
+
             <Link to="/marketplace" onClick={() => setOpen(false)} className="block py-1.5 text-silver/90">{t("nav.marketplace")}</Link>
             <Link to="/sell" onClick={() => setOpen(false)} className="block py-1.5 text-silver/90">{t("nav.sell")}</Link>
             <a href="/#categories" onClick={() => setOpen(false)} className="block py-1.5 text-silver/90">{t("nav.categories")}</a>
