@@ -68,7 +68,6 @@ function ListingDetail() {
   // Track view + recently viewed
   useEffect(() => {
     if (!data?.listing) return;
-    supabase.rpc; // no-op reference
     supabase.from("listings").update({ views_count: (data.listing.views_count ?? 0) + 1 }).eq("id", id).then(() => {});
     if (user) {
       supabase.from("recently_viewed").upsert({ user_id: user.id, listing_id: id, viewed_at: new Date().toISOString() }).then(() => {});
