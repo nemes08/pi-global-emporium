@@ -28,9 +28,12 @@ function ListingDetail() {
   const { user } = useAuth();
   const { usdPerPi } = usePricing();
 
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
   const { data, isLoading } = useQuery({
     queryKey: ["listing", id],
     queryFn: async () => {
+      if (!isUuid) return { listing: null, media: [] as ListingMediaRow[] };
       const [{ data: listing }, { data: media }] = await Promise.all([
         supabase.from("listings").select("*").eq("id", id).maybeSingle(),
         supabase.from("listing_media").select("*").eq("listing_id", id).order("sort_order"),
@@ -38,6 +41,7 @@ function ListingDetail() {
       return { listing: listing as ListingRow | null, media: (media ?? []) as ListingMediaRow[] };
     },
   });
+
 
   const [mediaUrls, setMediaUrls] = useState<{ url: string; type: string }[]>([]);
   const [activeIdx, setActiveIdx] = useState(0);
