@@ -70,15 +70,18 @@ export function Navbar() {
             <button
               className="grid min-h-11 min-w-11 place-items-center rounded-full border border-white/10 bg-white/5 text-silver md:hidden"
               onClick={() => setOpen((v) => !v)}
-              aria-label="Menu"
+              aria-label={open ? "Close menu" : "Open menu"}
+              aria-expanded={open}
+              aria-controls="mobile-nav"
             >
-              ☰
+              <span aria-hidden="true">☰</span>
             </button>
           </div>
         </nav>
 
         {open && (
-          <div className="md:hidden border-t border-white/10 px-4 py-3 space-y-2 text-sm">
+          <div id="mobile-nav" className="md:hidden border-t border-white/10 px-4 py-3 space-y-2 text-sm">
+
             <Link to="/marketplace" onClick={() => setOpen(false)} className="block py-1.5 text-silver/90">{t("nav.marketplace")}</Link>
             <Link to="/sell" onClick={() => setOpen(false)} className="block py-1.5 text-silver/90">{t("nav.sell")}</Link>
             <a href="/#categories" onClick={() => setOpen(false)} className="block py-1.5 text-silver/90">{t("nav.categories")}</a>
