@@ -1,11 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { AccountLayout } from "@/components/AccountLayout";
 import { useAuth } from "@/lib/auth";
 import { usePricing } from "@/lib/pricing";
-import { isPiBrowser, piAuthenticate, piCreatePayment } from "@/lib/pi-sdk";
-import { fundEscrowWithPi } from "@/lib/escrow.functions";
+import { isPiBrowser, piAuthenticateWithRecovery, piCreatePayment, type PiIncompletePayment } from "@/lib/pi-sdk";
+import { approvePiPayment, fundEscrowWithPi, recoverIncompletePiPayment } from "@/lib/escrow.functions";
+import { GCV_USD_PER_PI } from "@/lib/pricing";
 import {
   ESCROW_FLOW,
   ESCROW_LABEL,
@@ -46,6 +48,9 @@ function EscrowPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const approvePayment = useServerFn(approvePiPayment);
+  const completePayment = useServerFn(fundEscrowWithPi);
+  const recoverPayment = useServerFn(recoverIncompletePiPayment);
 
   const uid = user?.id;
 
@@ -58,6 +63,18 @@ function EscrowPage() {
   const { data: disputes = [] } = useQuery({
     queryKey: ["disputes", uid],
     queryFn: () => fetchMyDisputes(uid!),
+    enabled: !!uid,
+  });
+
+  const { data: piSandbox = true } = useQuery({
+    queryKey: ["pi-network", uid],
+    queryFn: async () => {
+      if (!uid) return true;
+      const { data } = await import("@/integrations/supabase/client").then(({ supabase }) =>
+        supabase.from("profiles").select("pi_sandbox").eq("id", uid).maybeSingle(),
+      );
+      return data?.pi_sandbox ?? true;
+    },
     enabled: !!uid,
   });
 
@@ -89,14 +106,21 @@ function EscrowPage() {
     }
   }
 
-  async function payWithPi(escrow: EscrowWithOrder, usdPerPi: number) {
+  async function recoverIncomplete(payment: PiIncompletePayment) {
+    const paymentId = payment.identifier;
+    const escrowId = payment.metadata?.["escrowId"];
+    if (!paymentId || typeof escrowId !== "string") return;
+    await recoverPayment({ data: { paymentId, escrowId, txId: payment.transaction?.txid } });
+  }
+
+  async function payWithPi(escrow: EscrowWithOrder) {
     setBusy(escrow.id);
     setError(null);
     setNotice(null);
     try {
       if (!isPiBrowser()) throw new Error("Open this page in the Pi Browser to pay with Pi.");
-      await piAuthenticate(true);
-      const piAmount = Number((escrow.amount_usd / usdPerPi).toFixed(7));
+      await piAuthenticateWithRecovery(piSandbox, recoverIncomplete);
+      const piAmount = Number((escrow.amount_usd / GCV_USD_PER_PI).toFixed(7));
       await new Promise<void>((resolve, reject) => {
         void piCreatePayment(
           {
@@ -105,12 +129,14 @@ function EscrowPage() {
             metadata: { escrowId: escrow.id, orderId: escrow.order_id },
           },
           {
-            onReadyForServerApproval: () => {
-              /* server-side approval happens when a Pi platform key is configured */
+            onReadyForServerApproval: (paymentId: string) => {
+              void approvePayment({ data: { escrowId: escrow.id, paymentId } }).catch((e) => {
+                reject(e instanceof Error ? e : new Error("Pi payment approval failed"));
+              });
             },
             onReadyForServerCompletion: async (paymentId: string, txid: string) => {
               try {
-                await fundEscrowWithPi({ data: { escrowId: escrow.id, paymentId, txId: txid, sandbox: true } });
+                await completePayment({ data: { escrowId: escrow.id, paymentId, txId: txid } });
                 resolve();
               } catch (e) {
                 reject(e instanceof Error ? e : new Error("Escrow funding failed"));
@@ -119,7 +145,7 @@ function EscrowPage() {
             onCancel: () => reject(new Error("Pi payment cancelled")),
             onError: (e: Error) => reject(e),
           },
-          true,
+          piSandbox,
         );
       });
       setNotice("Pi payment verified — funds are held in escrow.");
@@ -271,7 +297,7 @@ function EscrowCard({
   userId: string;
   onToggle: () => void;
   onAct: (e: EscrowWithOrder, s: EscrowStatus, label: string) => void;
-  onPay: (e: EscrowWithOrder, usdPerPi: number) => void;
+  onPay: (e: EscrowWithOrder) => void;
   onDisputed: () => void;
 }) {
   const { usdPerPi } = usePricing();
@@ -339,7 +365,7 @@ function EscrowCard({
         {role === "buyer" && escrow.status === "awaiting_payment" && (
           <button
             disabled={busy}
-            onClick={() => onPay(escrow, usdPerPi)}
+            onClick={() => onPay(escrow)}
             className="btn-gold rounded-full px-4 py-2 text-xs disabled:opacity-50"
           >
             {busy ? "Processing…" : "Pay with Pi"}

@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { isPiBrowser, piAuthenticate } from "@/lib/pi-sdk";
+import { isPiBrowser, piAuthenticateWithRecovery, type PiIncompletePayment } from "@/lib/pi-sdk";
 import { linkPiIdentity, unlinkPiIdentity } from "@/lib/pi.functions";
+import { recoverIncompletePiPayment } from "@/lib/escrow.functions";
 
 type LinkedPi = {
   pi_uid: string | null;
@@ -22,6 +23,7 @@ export function PiConnectCard() {
   const { user } = useAuth();
   const link = useServerFn(linkPiIdentity);
   const unlink = useServerFn(unlinkPiIdentity);
+  const recover = useServerFn(recoverIncompletePiPayment);
 
   const [linked, setLinked] = useState<LinkedPi | null>(null);
   const [busy, setBusy] = useState(false);
@@ -48,7 +50,12 @@ export function PiConnectCard() {
   async function connect() {
     setBusy(true); setErr(null); setOk(null);
     try {
-      const authed = await piAuthenticate(sandbox);
+      const authed = await piAuthenticateWithRecovery(sandbox, async (payment: PiIncompletePayment) => {
+        const paymentId = payment.identifier;
+        const escrowId = payment.metadata?.["escrowId"];
+        if (!paymentId || typeof escrowId !== "string") return;
+        await recover({ data: { paymentId, escrowId, txId: payment.transaction?.txid } });
+      });
       const r = await link({ data: { accessToken: authed.accessToken, sandbox } });
       setLinked({ pi_uid: r.uid, pi_username: r.username, pi_sandbox: r.sandbox });
       setOk(`Connected as @${r.username}`);
