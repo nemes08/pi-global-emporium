@@ -8,6 +8,7 @@ import { usePricing } from "@/lib/pricing";
 import { isPiBrowser, piAuthenticateWithRecovery, piCreatePayment, type PiIncompletePayment } from "@/lib/pi-sdk";
 import { approvePiPayment, fundEscrowWithPi, recoverIncompletePiPayment } from "@/lib/escrow.functions";
 import { GCV_USD_PER_PI } from "@/lib/pricing";
+import { supabase } from "@/integrations/supabase/client";
 import {
   ESCROW_FLOW,
   ESCROW_LABEL,
@@ -70,9 +71,7 @@ function EscrowPage() {
     queryKey: ["pi-network", uid],
     queryFn: async () => {
       if (!uid) return true;
-      const { data } = await import("@/integrations/supabase/client").then(({ supabase }) =>
-        supabase.from("profiles").select("pi_sandbox").eq("id", uid).maybeSingle(),
-      );
+      const { data } = await supabase.from("profiles").select("pi_sandbox").eq("id", uid).maybeSingle();
       return data?.pi_sandbox ?? true;
     },
     enabled: !!uid,

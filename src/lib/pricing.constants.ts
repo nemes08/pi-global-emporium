@@ -1,0 +1,1 @@
+export const GCV_USD_PER_PI = 314159;

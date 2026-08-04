@@ -1,10 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-
-const paymentInput = z.object({ escrowId: z.string().uuid(), paymentId: z.string().min(3).max(200) });
-const completeInput = paymentInput.extend({ txId: z.string().min(3).max(200) });
-const recoveryInput = z.object({ paymentId: z.string().min(3).max(200), escrowId: z.string().uuid(), txId: z.string().min(3).max(200).optional() });
+import { completeInput, paymentInput, recoveryInput } from "@/lib/escrow.schemas";
 
 export const approvePiPayment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

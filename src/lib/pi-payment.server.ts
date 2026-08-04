@@ -1,6 +1,9 @@
-import { GCV_USD_PER_PI } from "@/lib/pricing";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
+import { GCV_USD_PER_PI } from "@/lib/pricing.constants";
 
-type AuthContext = { supabase: any; userId: string };
+type AuthContext = { supabase: SupabaseClient<Database>; userId: string };
+type Escrow = { id: string; buyer_id: string; amount_usd: number; status: string; order_id: string; pi_payment_id: string | null };
 type Payment = { identifier?: string; amount?: number; metadata?: Record<string, unknown>; transaction?: { txid?: string; verified?: boolean } | null; status?: { developer_approved?: boolean; developer_completed?: boolean; cancelled?: boolean } };
 
 function apiKey() {
@@ -26,10 +29,10 @@ async function ownedEscrow(context: AuthContext, escrowId: string) {
   const { data, error } = await context.supabase.from("escrows").select("id,buyer_id,amount_usd,status,order_id,pi_payment_id").eq("id", escrowId).maybeSingle();
   if (error) throw new Error(error.message);
   if (!data || data.buyer_id !== context.userId) throw new Error("Escrow not found");
-  return data;
+  return data as Escrow;
 }
 
-function validatePayment(payment: Payment, escrow: any, paymentId: string) {
+function validatePayment(payment: Payment, escrow: Escrow, paymentId: string) {
   if (payment.identifier && payment.identifier !== paymentId) throw new Error("Payment identifier mismatch");
   if (payment.status?.cancelled) throw new Error("This Pi payment was cancelled");
   if (payment.metadata?.["escrowId"] !== escrow.id || payment.metadata?.["orderId"] !== escrow.order_id) throw new Error("Payment metadata does not match this escrow");
