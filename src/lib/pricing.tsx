@@ -1,8 +1,9 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useI18n } from "./i18n";
+import { GCV_USD_PER_PI } from "./pricing.constants";
 
 /** Community GCV Reference constant — 1 Pi = 314,159 USD */
-export const GCV_USD_PER_PI = 314159;
+export { GCV_USD_PER_PI } from "./pricing.constants";
 
 export type PricingMode = "gcv" | "market";
 

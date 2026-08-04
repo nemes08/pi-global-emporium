@@ -5,4 +5,7 @@
   <url><loc>/marketplace</loc><changefreq>hourly</changefreq><priority>0.9</priority></url>
   <url><loc>/sell</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>/auth</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>
+  <url><loc>/terms</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
+  <url><loc>/privacy</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
+  <url><loc>/cookies</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
 </urlset>

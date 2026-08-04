@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { useI18n } from "@/lib/i18n";
 
 export function Footer() {
@@ -16,25 +17,25 @@ export function Footer() {
         <div>
           <h4 className="mb-3 text-xs uppercase tracking-widest text-gold">{t("footer.company")}</h4>
           <ul className="space-y-2 text-sm text-silver/80">
-            <li><a href="#" className="hover:text-white">About</a></li>
-            <li><a href="#" className="hover:text-white">Careers</a></li>
-            <li><a href="#" className="hover:text-white">Press</a></li>
+            <li><Link to="/" hash="about" className="hover:text-white">About</Link></li>
+            <li><Link to="/marketplace" className="hover:text-white">Marketplace</Link></li>
+            <li><Link to="/sell" className="hover:text-white">Sell</Link></li>
           </ul>
         </div>
         <div>
           <h4 className="mb-3 text-xs uppercase tracking-widest text-gold">{t("footer.legal")}</h4>
           <ul className="space-y-2 text-sm text-silver/80">
-            <li><a href="#" className="hover:text-white">Terms</a></li>
-            <li><a href="#" className="hover:text-white">Privacy</a></li>
-            <li><a href="#" className="hover:text-white">Cookies</a></li>
+            <li><Link to="/terms" className="hover:text-white">Terms</Link></li>
+            <li><Link to="/privacy" className="hover:text-white">Privacy</Link></li>
+            <li><Link to="/cookies" className="hover:text-white">Cookies</Link></li>
           </ul>
         </div>
         <div>
           <h4 className="mb-3 text-xs uppercase tracking-widest text-gold">{t("footer.resources")}</h4>
           <ul className="space-y-2 text-sm text-silver/80">
-            <li><a href="#" className="hover:text-white">Pi Browser Guide</a></li>
-            <li><a href="#" className="hover:text-white">Seller Handbook</a></li>
-            <li><a href="#" className="hover:text-white">API</a></li>
+            <li><a href="https://minepi.com/download/" target="_blank" rel="noreferrer" className="hover:text-white">Get Pi Browser</a></li>
+            <li><Link to="/verification" className="hover:text-white">Seller verification</Link></li>
+            <li><Link to="/marketplace" className="hover:text-white">Browse listings</Link></li>
           </ul>
         </div>
       </div>

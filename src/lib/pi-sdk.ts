@@ -26,6 +26,14 @@ export type PiPaymentCallbacks = {
   onError?: (error: Error, payment?: unknown) => void;
 };
 
+export type PiIncompletePayment = {
+  identifier?: string;
+  amount?: number;
+  metadata?: Record<string, unknown>;
+  transaction?: { txid?: string; verified?: boolean } | null;
+  status?: { developer_approved?: boolean; developer_completed?: boolean; cancelled?: boolean };
+};
+
 type PiAuthResult = {
   user: { uid: string; username: string };
   accessToken: string;
@@ -111,8 +119,18 @@ export async function piAuthenticate(sandbox = true): Promise<PiUser> {
     throw new Error("Open in the Pi Browser to sign in with Pi.");
   }
   const pi = await initPiSdk(sandbox);
-  const res = await pi.authenticate(["username", "payments"], () => {
-    /* incomplete-payment recovery hook — wire once Pi payments go live */
+  const res = await pi.authenticate(["username", "payments"], () => {});
+  return { uid: res.user.uid, username: res.user.username, accessToken: res.accessToken };
+}
+
+export async function piAuthenticateWithRecovery(
+  sandbox: boolean,
+  recover: (payment: PiIncompletePayment) => Promise<void>,
+): Promise<PiUser> {
+  if (!isPiBrowser()) throw new Error("Open in the Pi Browser to sign in with Pi.");
+  const pi = await initPiSdk(sandbox);
+  const res = await pi.authenticate(["username", "payments"], (payment) => {
+    void recover(payment as PiIncompletePayment).catch(() => {});
   });
   return { uid: res.user.uid, username: res.user.username, accessToken: res.accessToken };
 }
