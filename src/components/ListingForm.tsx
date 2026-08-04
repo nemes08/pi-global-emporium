@@ -248,7 +248,7 @@ export function ListingForm({ initial, initialMedia, onSaved }: Props) {
               {m.media_type === "video" ? (
                 <video src={m.url ?? undefined} className="h-full w-full object-cover" muted />
               ) : (
-                m.url && <img src={m.url} alt="" className="h-full w-full object-cover" />
+                m.url && <img src={m.url} alt="Listing media preview" loading="lazy" className="h-full w-full object-cover" />
               )}
               <button
                 type="button"

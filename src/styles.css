@@ -93,8 +93,12 @@
     color: var(--color-foreground);
     min-height: 100dvh;
   }
-  h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: -0.01em; }
+  h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: 0; }
   [dir="rtl"] { direction: rtl; }
+  :focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  }
 }
 
 @utility glass {

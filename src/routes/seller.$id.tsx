@@ -35,11 +35,13 @@ export const Route = createFileRoute("/seller/$id")({
 
 function SellerProfile() {
   const { id } = Route.useParams();
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["seller", id],
     queryFn: async () => {
+      if (!isUuid) return { profile: null, listings: [], stats: null };
       const [{ data: profile }, { data: listings }, stats] = await Promise.all([
         supabase.from("profiles").select("id, full_name, username, avatar_url, verified, dealer_tier, country, city, biography, join_date")
           .eq("id", id).maybeSingle(),
@@ -87,7 +89,7 @@ function SellerProfile() {
               <div className="flex flex-col gap-6 md:flex-row md:items-center">
                 <div className="h-24 w-24 shrink-0 overflow-hidden rounded-full border border-gold/40 bg-black/40 grid place-items-center">
                   {avatarUrl ? (
-                    <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+                    <img src={avatarUrl} alt={`${p.full_name ?? p.username ?? "Seller"} profile`} className="h-full w-full object-cover" />
                   ) : (
                     <span className="font-display text-3xl text-gradient-gold">
                       {(p.full_name?.[0] ?? p.username?.[0] ?? "?").toUpperCase()}

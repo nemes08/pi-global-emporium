@@ -220,7 +220,7 @@ function ListingDetail() {
                         {m.type === "video" ? (
                           <div className="h-full w-full grid place-items-center bg-black text-xs text-silver">▶</div>
                         ) : (
-                          <img src={m.url} alt="" className="h-full w-full object-cover" />
+                          <img src={m.url} alt={`${l.title} image ${i + 1}`} loading="lazy" className="h-full w-full object-cover" />
                         )}
                       </button>
                     ))}
