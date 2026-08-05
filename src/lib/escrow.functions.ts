@@ -6,8 +6,10 @@ export const approvePiPayment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => paymentInput.parse(input))
   .handler(async ({ data, context }) => {
+    const apiKey = process.env["PI_API_KEY"];
+    if (!apiKey) throw new Error("Pi payments are not configured yet.");
     const { approvePayment } = await import("@/lib/pi-payment.server");
-    return approvePayment(data, context);
+    return approvePayment(data, context, apiKey);
   });
 
 /**
@@ -23,14 +25,18 @@ export const fundEscrowWithPi = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => completeInput.parse(input))
   .handler(async ({ data, context }) => {
+    const apiKey = process.env["PI_API_KEY"];
+    if (!apiKey) throw new Error("Pi payments are not configured yet.");
     const { completePayment } = await import("@/lib/pi-payment.server");
-    return completePayment(data, context);
+    return completePayment(data, context, apiKey);
   });
 
 export const recoverIncompletePiPayment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => recoveryInput.parse(input))
   .handler(async ({ data, context }) => {
+    const apiKey = process.env["PI_API_KEY"];
+    if (!apiKey) throw new Error("Pi payments are not configured yet.");
     const { recoverPayment } = await import("@/lib/pi-payment.server");
-    return recoverPayment(data, context);
+    return recoverPayment(data, context, apiKey);
   });
