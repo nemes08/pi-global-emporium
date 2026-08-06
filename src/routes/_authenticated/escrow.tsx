@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth";
 import { usePricing } from "@/lib/pricing";
 import { isPiBrowser, piAuthenticateWithRecovery, piCreatePayment, type PiIncompletePayment } from "@/lib/pi-sdk";
 import { approvePiPayment, fundEscrowWithPi, recoverIncompletePiPayment } from "@/lib/escrow.functions";
+import { refundEscrowToBuyer, releaseEscrowToSeller } from "@/lib/payout.functions";
 import { GCV_USD_PER_PI } from "@/lib/pricing";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -52,6 +53,8 @@ function EscrowPage() {
   const approvePayment = useServerFn(approvePiPayment);
   const completePayment = useServerFn(fundEscrowWithPi);
   const recoverPayment = useServerFn(recoverIncompletePiPayment);
+  const releaseToSeller = useServerFn(releaseEscrowToSeller);
+  const refundToBuyer = useServerFn(refundEscrowToBuyer);
 
   const uid = user?.id;
 
@@ -102,6 +105,29 @@ function EscrowPage() {
     else {
       setNotice(label);
       refresh();
+    }
+  }
+
+  /** Real Pi blockchain payout (App-to-User) for release or refund. */
+  async function payout(escrow: EscrowWithOrder, kind: "release" | "refund") {
+    setBusy(escrow.id);
+    setError(null);
+    setNotice(null);
+    try {
+      const res =
+        kind === "release"
+          ? await releaseToSeller({ data: { escrowId: escrow.id } })
+          : await refundToBuyer({ data: { escrowId: escrow.id } });
+      setNotice(
+        kind === "release"
+          ? `${res.amountPi} π released to the seller on the Pi blockchain (tx ${res.txId.slice(0, 10)}…).`
+          : `${res.amountPi} π refunded to the buyer on the Pi blockchain (tx ${res.txId.slice(0, 10)}…).`,
+      );
+      refresh();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(null);
     }
   }
 
@@ -234,6 +260,7 @@ function EscrowPage() {
                     onToggle={() => setOpenId(openId === e.id ? null : e.id)}
                     onAct={act}
                     onPay={payWithPi}
+                    onPayout={payout}
                     onDisputed={refresh}
                     userId={uid!}
                   />
@@ -263,6 +290,7 @@ function EscrowPage() {
                     onToggle={() => setOpenId(openId === e.id ? null : e.id)}
                     onAct={act}
                     onPay={payWithPi}
+                    onPayout={payout}
                     onDisputed={refresh}
                     userId={uid!}
                   />
@@ -286,6 +314,7 @@ function EscrowCard({
   onToggle,
   onAct,
   onPay,
+  onPayout,
   onDisputed,
 }: {
   escrow: EscrowWithOrder;
@@ -297,6 +326,7 @@ function EscrowCard({
   onToggle: () => void;
   onAct: (e: EscrowWithOrder, s: EscrowStatus, label: string) => void;
   onPay: (e: EscrowWithOrder) => void;
+  onPayout: (e: EscrowWithOrder, kind: "release" | "refund") => void;
   onDisputed: () => void;
 }) {
   const { usdPerPi } = usePricing();
@@ -384,9 +414,9 @@ function EscrowCard({
             Mark as shipped
           </button>
         )}
-        {role === "seller" && ["funded", "shipped"].includes(escrow.status) && (
-          <ActionBtn busy={busy} onClick={() => onAct(escrow, "refunded", "Escrow refunded to the buyer.")}>
-            Refund buyer
+        {role === "seller" && ["funded", "shipped", "delivered"].includes(escrow.status) && (
+          <ActionBtn busy={busy} onClick={() => onPayout(escrow, "refund")}>
+            {busy ? "Sending Pi…" : "Refund buyer in Pi"}
           </ActionBtn>
         )}
         {role === "buyer" && escrow.status === "shipped" && (
@@ -401,10 +431,10 @@ function EscrowCard({
         {role === "buyer" && escrow.status === "delivered" && (
           <button
             disabled={busy}
-            onClick={() => onAct(escrow, "released", "Pi released to the seller.")}
+            onClick={() => onPayout(escrow, "release")}
             className="btn-gold rounded-full px-4 py-2 text-xs disabled:opacity-50"
           >
-            Release Pi to seller
+            {busy ? "Sending Pi…" : "Release Pi to seller"}
           </button>
         )}
         {canDispute && !dispute && (
