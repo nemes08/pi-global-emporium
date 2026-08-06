@@ -108,6 +108,29 @@ function EscrowPage() {
     }
   }
 
+  /** Real Pi blockchain payout (App-to-User) for release or refund. */
+  async function payout(escrow: EscrowWithOrder, kind: "release" | "refund") {
+    setBusy(escrow.id);
+    setError(null);
+    setNotice(null);
+    try {
+      const res =
+        kind === "release"
+          ? await releaseToSeller({ data: { escrowId: escrow.id } })
+          : await refundToBuyer({ data: { escrowId: escrow.id } });
+      setNotice(
+        kind === "release"
+          ? `${res.amountPi} π released to the seller on the Pi blockchain (tx ${res.txId.slice(0, 10)}…).`
+          : `${res.amountPi} π refunded to the buyer on the Pi blockchain (tx ${res.txId.slice(0, 10)}…).`,
+      );
+      refresh();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(null);
+    }
+  }
+
   async function recoverIncomplete(payment: PiIncompletePayment) {
     const paymentId = payment.identifier;
     const escrowId = payment.metadata?.["escrowId"];
