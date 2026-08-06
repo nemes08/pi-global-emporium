@@ -581,6 +581,62 @@ export type Database = {
           },
         ]
       }
+      pi_payouts: {
+        Row: {
+          amount_pi: number
+          amount_usd: number
+          created_at: string
+          error: string | null
+          escrow_id: string
+          id: string
+          kind: string
+          network: string
+          pi_payment_id: string | null
+          pi_tx_id: string | null
+          recipient_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_pi: number
+          amount_usd: number
+          created_at?: string
+          error?: string | null
+          escrow_id: string
+          id?: string
+          kind: string
+          network?: string
+          pi_payment_id?: string | null
+          pi_tx_id?: string | null
+          recipient_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_pi?: number
+          amount_usd?: number
+          created_at?: string
+          error?: string | null
+          escrow_id?: string
+          id?: string
+          kind?: string
+          network?: string
+          pi_payment_id?: string | null
+          pi_tx_id?: string | null
+          recipient_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pi_payouts_escrow_id_fkey"
+            columns: ["escrow_id"]
+            isOneToOne: false
+            referencedRelation: "escrows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_contacts: {
         Row: {
           created_at: string
@@ -836,13 +892,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
