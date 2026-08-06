@@ -53,6 +53,8 @@ function EscrowPage() {
   const approvePayment = useServerFn(approvePiPayment);
   const completePayment = useServerFn(fundEscrowWithPi);
   const recoverPayment = useServerFn(recoverIncompletePiPayment);
+  const releaseToSeller = useServerFn(releaseEscrowToSeller);
+  const refundToBuyer = useServerFn(refundEscrowToBuyer);
 
   const uid = user?.id;
 
