@@ -260,6 +260,7 @@ function EscrowPage() {
                     onToggle={() => setOpenId(openId === e.id ? null : e.id)}
                     onAct={act}
                     onPay={payWithPi}
+                    onPayout={payout}
                     onDisputed={refresh}
                     userId={uid!}
                   />
@@ -289,6 +290,7 @@ function EscrowPage() {
                     onToggle={() => setOpenId(openId === e.id ? null : e.id)}
                     onAct={act}
                     onPay={payWithPi}
+                    onPayout={payout}
                     onDisputed={refresh}
                     userId={uid!}
                   />
@@ -312,6 +314,7 @@ function EscrowCard({
   onToggle,
   onAct,
   onPay,
+  onPayout,
   onDisputed,
 }: {
   escrow: EscrowWithOrder;
@@ -323,6 +326,7 @@ function EscrowCard({
   onToggle: () => void;
   onAct: (e: EscrowWithOrder, s: EscrowStatus, label: string) => void;
   onPay: (e: EscrowWithOrder) => void;
+  onPayout: (e: EscrowWithOrder, kind: "release" | "refund") => void;
   onDisputed: () => void;
 }) {
   const { usdPerPi } = usePricing();
@@ -410,9 +414,9 @@ function EscrowCard({
             Mark as shipped
           </button>
         )}
-        {role === "seller" && ["funded", "shipped"].includes(escrow.status) && (
-          <ActionBtn busy={busy} onClick={() => onAct(escrow, "refunded", "Escrow refunded to the buyer.")}>
-            Refund buyer
+        {role === "seller" && ["funded", "shipped", "delivered"].includes(escrow.status) && (
+          <ActionBtn busy={busy} onClick={() => onPayout(escrow, "refund")}>
+            {busy ? "Sending Pi…" : "Refund buyer in Pi"}
           </ActionBtn>
         )}
         {role === "buyer" && escrow.status === "shipped" && (
@@ -427,10 +431,10 @@ function EscrowCard({
         {role === "buyer" && escrow.status === "delivered" && (
           <button
             disabled={busy}
-            onClick={() => onAct(escrow, "released", "Pi released to the seller.")}
+            onClick={() => onPayout(escrow, "release")}
             className="btn-gold rounded-full px-4 py-2 text-xs disabled:opacity-50"
           >
-            Release Pi to seller
+            {busy ? "Sending Pi…" : "Release Pi to seller"}
           </button>
         )}
         {canDispute && !dispute && (
