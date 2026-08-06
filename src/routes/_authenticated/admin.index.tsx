@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { fetchAdminCounts, fetchRevenue, PLATFORM_FEE_RATE } from "@/lib/admin";
 import { usePricing } from "@/lib/pricing";
+import { PiPayoutsPanel } from "@/components/admin/PiPayoutsPanel";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   head: () => ({
@@ -79,6 +80,8 @@ function AdminOverview() {
           })}
         </ul>
       )}
+
+      <PiPayoutsPanel />
 
       <p className="mt-6 text-[11px] text-silver/50">
         Pi figures use the Community GCV Reference (1 Pi = 314,159 USD), a community ecosystem reference and NOT an
