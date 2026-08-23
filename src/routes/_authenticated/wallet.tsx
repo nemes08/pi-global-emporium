@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AccountLayout } from "@/components/AccountLayout";
 import { PiConnectCard } from "@/components/PiConnectCard";
 import { GCV_USD_PER_PI, usePricing } from "@/lib/pricing";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/wallet")({
   head: () => ({
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/_authenticated/wallet")({
 });
 
 function WalletPage() {
+  const { t } = useI18n();
   const { usdPerPi, mode } = usePricing();
   const { data } = useQuery({
     queryKey: ["wallet-activity"],
@@ -35,39 +37,38 @@ function WalletPage() {
   });
 
   return (
-    <AccountLayout title="Wallet Overview">
+    <AccountLayout title={t("dash.walletOverview")}>
       <div className="grid gap-4 md:grid-cols-2">
         <PiConnectCard />
 
         <div className="glass-strong rounded-3xl p-6 border border-gold/30 relative overflow-hidden">
           <div className="absolute inset-0 pointer-events-none opacity-20 bg-gradient-to-br from-gold/40 via-transparent to-transparent" />
           <div className="relative">
-            <p className="text-xs uppercase tracking-widest text-gold">Balance</p>
+            <p className="text-xs uppercase tracking-widest text-gold">{t("wallet.balance")}</p>
             <p className="font-display text-4xl text-gradient-gold mt-2">— π</p>
-            <p className="mt-1 text-xs text-silver/60">Live balance activates once the Pi Wallet is connected in the Pi Browser.</p>
+            <p className="mt-1 text-xs text-silver/60">{t("wallet.liveBalanceHint")}</p>
             <p className="mt-4 text-[10px] text-silver/50">
-              Rate: 1 π = ${usdPerPi.toLocaleString()} USD ({mode === "gcv" ? "GCV community reference" : "Exchange market value"})
+              {t("wallet.rate")}: 1 π = ${usdPerPi.toLocaleString()} USD ({mode === "gcv" ? t("wallet.gcvRef") : t("price.market")})
             </p>
           </div>
         </div>
 
         <div className="glass rounded-2xl p-6 border border-white/10 md:col-span-2">
-          <p className="text-xs uppercase tracking-widest text-silver/60">Marketplace activity</p>
+          <p className="text-xs uppercase tracking-widest text-silver/60">{t("wallet.marketplaceActivity")}</p>
           <ul className="mt-3 space-y-3 text-sm">
-            <Row label="Total spent" value={`$${(data?.spent ?? 0).toLocaleString()}`} sub={`${((data?.spent ?? 0) / usdPerPi).toLocaleString(undefined, { maximumFractionDigits: 5 })} π`} />
-            <Row label="Total earned" value={`$${(data?.earned ?? 0).toLocaleString()}`} sub={`${((data?.earned ?? 0) / usdPerPi).toLocaleString(undefined, { maximumFractionDigits: 5 })} π`} />
-            <Row label="Net" value={`$${(data?.netUsd ?? 0).toLocaleString()}`} sub={`${((data?.netUsd ?? 0) / usdPerPi).toLocaleString(undefined, { maximumFractionDigits: 5 })} π`} />
+            <Row label={t("wallet.totalSpent")} value={`$${(data?.spent ?? 0).toLocaleString()}`} sub={`${((data?.spent ?? 0) / usdPerPi).toLocaleString(undefined, { maximumFractionDigits: 5 })} π`} />
+            <Row label={t("wallet.totalEarned")} value={`$${(data?.earned ?? 0).toLocaleString()}`} sub={`${((data?.earned ?? 0) / usdPerPi).toLocaleString(undefined, { maximumFractionDigits: 5 })} π`} />
+            <Row label={t("wallet.net")} value={`$${(data?.netUsd ?? 0).toLocaleString()}`} sub={`${((data?.netUsd ?? 0) / usdPerPi).toLocaleString(undefined, { maximumFractionDigits: 5 })} π`} />
           </ul>
           <div className="mt-4 flex gap-2">
-            <Link to="/orders" className="btn-ghost-silver rounded-full px-4 py-1.5 text-xs">View orders</Link>
-            <Link to="/offers" className="btn-ghost-silver rounded-full px-4 py-1.5 text-xs">View offers</Link>
+            <Link to="/orders" className="btn-ghost-silver rounded-full px-4 py-1.5 text-xs">{t("wallet.viewOrders")}</Link>
+            <Link to="/offers" className="btn-ghost-silver rounded-full px-4 py-1.5 text-xs">{t("wallet.viewOffers")}</Link>
           </div>
         </div>
       </div>
 
       <div className="mt-6 glass rounded-2xl p-5 border border-white/10 text-[10px] leading-relaxed text-silver/60">
-        Community GCV Reference (1 π = {GCV_USD_PER_PI.toLocaleString()} USD) is a community ecosystem reference and is NOT an official Pi Network exchange rate.
-        On-chain Pi payments and balances become active inside Pi Browser once Pi SDK integration is enabled.
+        {t("dash.gcvReference")} (1 π = {GCV_USD_PER_PI.toLocaleString()} USD) {t("wallet.disclaimer")}
       </div>
     </AccountLayout>
   );
