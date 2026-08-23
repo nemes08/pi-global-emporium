@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AccountLayout } from "@/components/AccountLayout";
 import type { Profile } from "@/lib/auth";
-import { LANGS } from "@/lib/i18n";
+import { LANGS, useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
@@ -19,6 +19,7 @@ export const Route = createFileRoute("/_authenticated/profile")({
 });
 
 function ProfilePage() {
+  const { t } = useI18n();
   const qc = useQueryClient();
   const [form, setForm] = useState<Partial<Profile>>({});
   const [phone, setPhone] = useState<string>("");
@@ -83,7 +84,7 @@ function ProfilePage() {
       });
       if (cErr) throw cErr;
       await qc.invalidateQueries({ queryKey: ["me-profile"] });
-      setMsg("Profile saved");
+      setMsg(t("profile.saved"));
     } catch (e: unknown) {
       setErr(e instanceof Error ? e.message : "Failed to save");
     } finally { setBusy(false); }
@@ -101,14 +102,14 @@ function ProfilePage() {
       const { error } = await supabase.from("profiles").update({ avatar_url: path }).eq("id", u.user.id);
       if (error) throw error;
       await qc.invalidateQueries({ queryKey: ["me-profile"] });
-      setMsg("Photo updated");
+      setMsg(t("profile.photoUpdated"));
     } catch (e: unknown) {
       setErr(e instanceof Error ? e.message : "Upload failed");
     } finally { setBusy(false); }
   }
 
   return (
-    <AccountLayout title="My Profile">
+    <AccountLayout title={t("profile.title")}>
       <form onSubmit={save} className="glass rounded-2xl border border-white/10 p-6 space-y-5">
         <div className="flex items-center gap-4">
           <div className="h-20 w-20 rounded-full overflow-hidden border border-gold/30 bg-white/5 grid place-items-center">
@@ -116,30 +117,30 @@ function ProfilePage() {
           </div>
           <div>
             <label className="btn-ghost-silver inline-flex cursor-pointer rounded-full px-4 py-2 text-xs">
-              Change photo
+              {t("profile.changePhoto")}
               <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadAvatar(f); }} />
             </label>
-            <p className="mt-1 text-[11px] text-silver/60">JPG or PNG, max ~2MB.</p>
+            <p className="mt-1 text-[11px] text-silver/60">{t("profile.photoHint")}</p>
           </div>
           <div className="ml-auto text-right">
             <span className={`inline-block rounded-full px-3 py-1 text-[10px] uppercase tracking-widest ${profile?.verified ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30" : "bg-white/5 text-silver/60 border border-white/10"}`}>
-              {profile?.verified ? "Verified" : "Unverified"}
+              {profile?.verified ? t("dash.verified") : t("dash.unverified")}
             </span>
             <p className="mt-1 text-[11px] text-silver/50">
-              Joined {profile?.join_date ? new Date(profile.join_date).toLocaleDateString() : "—"}
+              {t("profile.joined")} {profile?.join_date ? new Date(profile.join_date).toLocaleDateString() : "—"}
             </p>
           </div>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <F label="Full name" value={form.full_name ?? ""} onChange={(v) => setForm({ ...form, full_name: v })} />
-          <F label="Username" value={form.username ?? ""} onChange={(v) => setForm({ ...form, username: v })} />
-          <F label="Email" value={contactEmail} onChange={setContactEmail} disabled />
-          <F label="Phone" value={phone} onChange={setPhone} />
-          <F label="Country" value={form.country ?? ""} onChange={(v) => setForm({ ...form, country: v })} />
-          <F label="City" value={form.city ?? ""} onChange={(v) => setForm({ ...form, city: v })} />
+          <F label={t("profile.fullName")} value={form.full_name ?? ""} onChange={(v) => setForm({ ...form, full_name: v })} />
+          <F label={t("profile.username")} value={form.username ?? ""} onChange={(v) => setForm({ ...form, username: v })} />
+          <F label={t("profile.email")} value={contactEmail} onChange={setContactEmail} disabled />
+          <F label={t("profile.phone")} value={phone} onChange={setPhone} />
+          <F label={t("profile.country")} value={form.country ?? ""} onChange={(v) => setForm({ ...form, country: v })} />
+          <F label={t("profile.city")} value={form.city ?? ""} onChange={(v) => setForm({ ...form, city: v })} />
           <label className="block">
-            <span className="text-xs text-silver/80">Preferred language</span>
+            <span className="text-xs text-silver/80">{t("profile.preferredLanguage")}</span>
             <select
               value={form.language ?? "en"} onChange={(e) => setForm({ ...form, language: e.target.value })}
               className="mt-1 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-gold/40"
@@ -148,7 +149,7 @@ function ProfilePage() {
             </select>
           </label>
           <label className="block">
-            <span className="text-xs text-silver/80">Preferred currency</span>
+            <span className="text-xs text-silver/80">{t("profile.preferredCurrency")}</span>
             <select
               value={form.currency ?? "USD"} onChange={(e) => setForm({ ...form, currency: e.target.value })}
               className="mt-1 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-gold/40"
@@ -159,11 +160,11 @@ function ProfilePage() {
         </div>
 
         <label className="block">
-          <span className="text-xs text-silver/80">Biography</span>
+          <span className="text-xs text-silver/80">{t("profile.biography")}</span>
           <textarea
             value={form.biography ?? ""} onChange={(e) => setForm({ ...form, biography: e.target.value })} rows={4} maxLength={1000}
             className="mt-1 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-gold/40"
-            placeholder="Tell buyers who you are…"
+            placeholder={t("profile.bioPlaceholder")}
           />
         </label>
 
@@ -171,7 +172,7 @@ function ProfilePage() {
         {msg && <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-300">{msg}</div>}
 
         <button disabled={busy} className="btn-gold rounded-full px-5 py-2.5 text-sm font-semibold disabled:opacity-60">
-          {busy ? "Saving…" : "Save changes"}
+          {busy ? t("profile.saving") : t("profile.saveChanges")}
         </button>
       </form>
     </AccountLayout>
