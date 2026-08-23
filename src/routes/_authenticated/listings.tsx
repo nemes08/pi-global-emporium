@@ -6,6 +6,7 @@ import { AccountLayout } from "@/components/AccountLayout";
 import { GCV_USD_PER_PI, usePricing } from "@/lib/pricing";
 import { CATEGORY_LABELS, type CategoryKey } from "@/lib/catalog";
 import { STATUS_LABEL, STATUS_TONE, signMediaUrl, type ListingRow, type ListingStatus } from "@/lib/listings";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/listings")({
   head: () => ({
@@ -19,16 +20,17 @@ export const Route = createFileRoute("/_authenticated/listings")({
   component: MyListings,
 });
 
-const TABS: { key: "all" | ListingStatus; label: string }[] = [
-  { key: "all", label: "All" },
-  { key: "active", label: "Active" },
-  { key: "draft", label: "Drafts" },
-  { key: "reserved", label: "Reserved" },
-  { key: "sold", label: "Sold" },
-  { key: "archived", label: "Archived" },
+const TAB_KEYS: { key: "all" | ListingStatus; label: string }[] = [
+  { key: "all", label: "listings.all" },
+  { key: "active", label: "dash.activeListings" },
+  { key: "draft", label: "dash.drafts" },
+  { key: "reserved", label: "dash.reserved" },
+  { key: "sold", label: "dash.sold" },
+  { key: "archived", label: "listings.archived" },
 ];
 
 function MyListings() {
+  const { t } = useI18n();
   const qc = useQueryClient();
   const [tab, setTab] = useState<"all" | ListingStatus>("all");
   const { usdPerPi } = usePricing();
@@ -72,26 +74,26 @@ function MyListings() {
   }, [listings]);
 
   return (
-    <AccountLayout title="My Listings">
+    <AccountLayout title={t("dash.myListings")}>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div className="flex flex-wrap gap-2">
-          {TABS.map((t) => (
+          {TAB_KEYS.map((tab_) => (
             <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
+              key={tab_.key}
+              onClick={() => setTab(tab_.key)}
               className={`rounded-full px-4 py-1.5 text-xs font-medium border transition ${
-                tab === t.key ? "btn-gold text-onyx border-transparent" : "border-white/10 text-silver/80 hover:border-gold/30"
+                tab === tab_.key ? "btn-gold text-onyx border-transparent" : "border-white/10 text-silver/80 hover:border-gold/30"
               }`}
             >
-              {t.label}<span className="ml-1.5 opacity-60">{counts[t.key] ?? 0}</span>
+              {t(tab_.label)}<span className="ml-1.5 opacity-60">{counts[tab_.key] ?? 0}</span>
             </button>
           ))}
         </div>
-        <Link to="/listings/new" className="btn-gold rounded-full px-5 py-2 text-sm">＋ New listing</Link>
+        <Link to="/listings/new" className="btn-gold rounded-full px-5 py-2 text-sm">＋ {t("dash.newListing")}</Link>
       </div>
 
       {isLoading ? (
-        <div className="text-sm text-silver/60">Loading…</div>
+        <div className="text-sm text-silver/60">{t("listings.loading")}</div>
       ) : filtered.length === 0 ? (
         <EmptyState />
       ) : (
@@ -106,12 +108,13 @@ function MyListings() {
 }
 
 function EmptyState() {
+  const { t } = useI18n();
   return (
     <div className="glass rounded-2xl p-10 text-center border border-white/10">
       <div className="text-4xl">✧</div>
-      <h3 className="font-display text-2xl mt-2 text-gradient-gold">No listings yet</h3>
-      <p className="text-sm text-silver/70 mt-1">Create your first premium listing in minutes.</p>
-      <Link to="/listings/new" className="mt-4 inline-flex btn-gold rounded-full px-5 py-2 text-sm">＋ Create listing</Link>
+      <h3 className="font-display text-2xl mt-2 text-gradient-gold">{t("listings.noneYet")}</h3>
+      <p className="text-sm text-silver/70 mt-1">{t("listings.createFirst")}</p>
+      <Link to="/listings/new" className="mt-4 inline-flex btn-gold rounded-full px-5 py-2 text-sm">＋ {t("listings.createListing")}</Link>
     </div>
   );
 }
@@ -127,6 +130,7 @@ function ListingCardOwn({
   onStatus: (id: string, s: ListingStatus) => void;
   onDelete: (id: string) => void;
 }) {
+  const { t } = useI18n();
   const [cover, setCover] = useState<string | null>(null);
   useEffect(() => { signMediaUrl(listing.cover_image).then(setCover); }, [listing.cover_image]);
   const pi = listing.price_usd / usdPerPi;
@@ -156,29 +160,29 @@ function ListingCardOwn({
           <span className="text-xs text-silver/60">${listing.price_usd.toLocaleString()}</span>
         </div>
         <div className="flex flex-wrap gap-2 pt-3 border-t border-white/5">
-          <Link to="/listings/$id/edit" params={{ id: listing.id }} className="btn-ghost-silver rounded-full px-3 py-1 text-[11px]">Edit</Link>
-          <Link to="/listing/$id" params={{ id: listing.id }} className="btn-ghost-silver rounded-full px-3 py-1 text-[11px]">View</Link>
+          <Link to="/listings/$id/edit" params={{ id: listing.id }} className="btn-ghost-silver rounded-full px-3 py-1 text-[11px]">{t("listings.edit")}</Link>
+          <Link to="/listing/$id" params={{ id: listing.id }} className="btn-ghost-silver rounded-full px-3 py-1 text-[11px]">{t("listings.view")}</Link>
           {listing.status === "draft" && (
-            <button onClick={() => onStatus(listing.id, "active")} className="rounded-full px-3 py-1 text-[11px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/30">Publish</button>
+            <button onClick={() => onStatus(listing.id, "active")} className="rounded-full px-3 py-1 text-[11px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/30">{t("listings.publish")}</button>
           )}
           {listing.status === "active" && (
             <>
-              <button onClick={() => onStatus(listing.id, "reserved")} className="rounded-full px-3 py-1 text-[11px] bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30">Mark reserved</button>
-              <button onClick={() => onStatus(listing.id, "sold")} className="rounded-full px-3 py-1 text-[11px] bg-sky-500/20 text-sky-300 border border-sky-500/30 hover:bg-sky-500/30">Mark sold</button>
+              <button onClick={() => onStatus(listing.id, "reserved")} className="rounded-full px-3 py-1 text-[11px] bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30">{t("listings.markReserved")}</button>
+              <button onClick={() => onStatus(listing.id, "sold")} className="rounded-full px-3 py-1 text-[11px] bg-sky-500/20 text-sky-300 border border-sky-500/30 hover:bg-sky-500/30">{t("listings.markSold")}</button>
             </>
           )}
           {listing.status === "reserved" && (
             <>
-              <button onClick={() => onStatus(listing.id, "sold")} className="rounded-full px-3 py-1 text-[11px] bg-sky-500/20 text-sky-300 border border-sky-500/30">Mark sold</button>
-              <button onClick={() => onStatus(listing.id, "active")} className="rounded-full px-3 py-1 text-[11px] bg-white/5 text-silver/70 border border-white/10">Release</button>
+              <button onClick={() => onStatus(listing.id, "sold")} className="rounded-full px-3 py-1 text-[11px] bg-sky-500/20 text-sky-300 border border-sky-500/30">{t("listings.markSold")}</button>
+              <button onClick={() => onStatus(listing.id, "active")} className="rounded-full px-3 py-1 text-[11px] bg-white/5 text-silver/70 border border-white/10">{t("listings.release")}</button>
             </>
           )}
           {listing.status !== "archived" ? (
-            <button onClick={() => onStatus(listing.id, "archived")} className="rounded-full px-3 py-1 text-[11px] bg-white/5 text-silver/70 border border-white/10 hover:bg-white/10">Archive</button>
+            <button onClick={() => onStatus(listing.id, "archived")} className="rounded-full px-3 py-1 text-[11px] bg-white/5 text-silver/70 border border-white/10 hover:bg-white/10">{t("listings.archive")}</button>
           ) : (
-            <button onClick={() => onStatus(listing.id, "draft")} className="rounded-full px-3 py-1 text-[11px] bg-white/5 text-silver/70 border border-white/10 hover:bg-white/10">Restore</button>
+            <button onClick={() => onStatus(listing.id, "draft")} className="rounded-full px-3 py-1 text-[11px] bg-white/5 text-silver/70 border border-white/10 hover:bg-white/10">{t("listings.restore")}</button>
           )}
-          <button onClick={() => onDelete(listing.id)} className="rounded-full px-3 py-1 text-[11px] bg-red-500/10 text-red-300 border border-red-500/20 hover:bg-red-500/20 ml-auto">Delete</button>
+          <button onClick={() => onDelete(listing.id)} className="rounded-full px-3 py-1 text-[11px] bg-red-500/10 text-red-300 border border-red-500/20 hover:bg-red-500/20 ml-auto">{t("listings.delete")}</button>
         </div>
         <p className="text-[9px] text-silver/40 pt-1">
           1 π ≈ {GCV_USD_PER_PI.toLocaleString()} USD (GCV community reference)
