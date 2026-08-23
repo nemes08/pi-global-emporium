@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AccountLayout } from "@/components/AccountLayout";
 import type { Profile } from "@/lib/auth";
 import { GCV_USD_PER_PI } from "@/lib/pricing";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 });
 
 function DashboardPage() {
+  const { t } = useI18n();
   const { data } = useQuery({
     queryKey: ["dashboard-summary"],
     queryFn: async () => {
@@ -67,74 +69,74 @@ function DashboardPage() {
   const completion = calcCompletion(profile);
 
   return (
-    <AccountLayout title="Dashboard">
+    <AccountLayout title={t("dash.title")}>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <div className="glass rounded-2xl p-6 border border-gold/20 md:col-span-2 xl:col-span-2">
-          <p className="text-xs uppercase tracking-widest text-gold">Welcome back</p>
+          <p className="text-xs uppercase tracking-widest text-gold">{t("dash.welcome")}</p>
           <h2 className="font-display text-2xl sm:text-3xl mt-1">
-            {profile?.full_name || profile?.username || "New member"}
+            {profile?.full_name || profile?.username || t("dash.newMember")}
           </h2>
           <p className="text-sm text-silver/70 mt-2">
-            One Marketplace. Unlimited Possibilities. Powered by Pi.
+            {t("hero.subtitle")}
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
-            <Link to="/listings/new" className="btn-gold rounded-full px-4 py-2 text-sm">＋ New listing</Link>
-            <Link to="/listings" className="btn-ghost-silver rounded-full px-4 py-2 text-sm">My listings</Link>
-            <Link to="/marketplace" className="btn-ghost-silver rounded-full px-4 py-2 text-sm">Browse marketplace</Link>
+            <Link to="/listings/new" className="btn-gold rounded-full px-4 py-2 text-sm">＋ {t("dash.newListing")}</Link>
+            <Link to="/listings" className="btn-ghost-silver rounded-full px-4 py-2 text-sm">{t("dash.myListings")}</Link>
+            <Link to="/marketplace" className="btn-ghost-silver rounded-full px-4 py-2 text-sm">{t("hero.browse")}</Link>
           </div>
         </div>
 
         <div className="glass rounded-2xl p-5 border border-white/10">
-          <p className="text-xs uppercase tracking-widest text-silver/60">Profile completion</p>
+          <p className="text-xs uppercase tracking-widest text-silver/60">{t("dash.profileCompletion")}</p>
           <div className="mt-3 flex items-end justify-between">
             <span className="font-display text-4xl text-gradient-gold">{completion}%</span>
-            <Link to="/profile" className="text-xs text-gold hover:underline">Complete →</Link>
+            <Link to="/profile" className="text-xs text-gold hover:underline">{t("dash.complete")} →</Link>
           </div>
           <div className="mt-3 h-2 rounded-full bg-white/5 overflow-hidden">
             <div className="h-full bg-gradient-to-r from-gold to-gold-soft" style={{ width: `${completion}%` }} />
           </div>
         </div>
 
-        <Stat label="Active listings" value={data?.listingsActive ?? 0} hint="Live on marketplace" href="/listings" />
-        <Stat label="Drafts" value={data?.listingsDraft ?? 0} hint="Continue editing" href="/listings?status=draft" />
-        <Stat label="Reserved" value={data?.listingsReserved ?? 0} hint="Held with Pi" href="/listings?status=reserved" />
-        <Stat label="Sold" value={data?.listingsSold ?? 0} hint="Completed deals" href="/listings?status=sold" />
-        <Stat label="Total views" value={data?.totalViews ?? 0} hint="Across all listings" href="/analytics" />
-        <Stat label="Offers received" value={data?.offersReceived ?? 0} hint="Pending your response" href="/offers" />
-        <Stat label="Offers sent" value={data?.offersSent ?? 0} hint="Awaiting seller" href="/offers?tab=sent" />
-        <Stat label="Orders" value={data?.orders ?? 0} hint="Buy / sell activity" href="/orders" />
-        <Stat label="Messages" value={data?.unreadMessages ?? 0} hint="Unread in inbox" href="/messages" />
-        <Stat label="Notifications" value={data?.unreadNotifications ?? 0} hint="Unread alerts" href="/notifications" />
-        <Stat label="Favorites" value={data?.favorites ?? 0} hint="Saved items" href="/favorites" />
-        <Stat label="Verification" value={profile?.verified ? "Verified" : "Pending"} hint="Trusted-seller badge" href="/verification" />
+        <Stat label={t("dash.activeListings")} value={data?.listingsActive ?? 0} hint={t("dash.liveOnMarketplace")} href="/listings" />
+        <Stat label={t("dash.drafts")} value={data?.listingsDraft ?? 0} hint={t("dash.continueEditing")} href="/listings?status=draft" />
+        <Stat label={t("dash.reserved")} value={data?.listingsReserved ?? 0} hint={t("dash.heldWithPi")} href="/listings?status=reserved" />
+        <Stat label={t("dash.sold")} value={data?.listingsSold ?? 0} hint={t("dash.completedDeals")} href="/listings?status=sold" />
+        <Stat label={t("dash.totalViews")} value={data?.totalViews ?? 0} hint={t("dash.acrossAllListings")} href="/analytics" />
+        <Stat label={t("dash.offersReceived")} value={data?.offersReceived ?? 0} hint={t("dash.pendingResponse")} href="/offers" />
+        <Stat label={t("dash.offersSent")} value={data?.offersSent ?? 0} hint={t("dash.awaitingSeller")} href="/offers?tab=sent" />
+        <Stat label={t("dash.orders")} value={data?.orders ?? 0} hint={t("dash.buySellActivity")} href="/orders" />
+        <Stat label={t("dash.messages")} value={data?.unreadMessages ?? 0} hint={t("dash.unreadInbox")} href="/messages" />
+        <Stat label={t("dash.notifications")} value={data?.unreadNotifications ?? 0} hint={t("dash.unreadAlerts")} href="/notifications" />
+        <Stat label={t("dash.favorites")} value={data?.favorites ?? 0} hint={t("dash.savedItems")} href="/favorites" />
+        <Stat label={t("dash.verification")} value={profile?.verified ? t("dash.verified") : t("dash.pending")} hint={t("dash.trustedBadge")} href="/verification" />
       </div>
 
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         <div className="glass rounded-2xl p-5 border border-gold/20">
-          <p className="text-xs uppercase tracking-widest text-gold">Wallet overview</p>
+          <p className="text-xs uppercase tracking-widest text-gold">{t("dash.walletOverview")}</p>
           <p className="mt-2 font-display text-2xl">Pi Wallet</p>
           <p className="text-xs text-silver/60 mt-1">
-            Connect inside Pi Browser to enable Buy Now, Reserve with Pi and payouts.
+            {t("dash.walletHint")}
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
-            <Link to="/wallet" className="btn-gold rounded-full px-4 py-2 text-xs">Open wallet</Link>
-            <button className="btn-ghost-silver rounded-full px-4 py-2 text-xs">Connect Pi Wallet</button>
+            <Link to="/wallet" className="btn-gold rounded-full px-4 py-2 text-xs">{t("dash.openWallet")}</Link>
+            <button className="btn-ghost-silver rounded-full px-4 py-2 text-xs">{t("hero.wallet")}</button>
           </div>
           <p className="mt-3 text-[10px] text-silver/50">
-            Community GCV Reference: 1 π = {GCV_USD_PER_PI.toLocaleString()} USD
+            {t("dash.gcvReference")}: 1 π = {GCV_USD_PER_PI.toLocaleString()} USD
           </p>
         </div>
         <div className="glass rounded-2xl p-5 border border-white/10">
-          <p className="text-xs uppercase tracking-widest text-silver/60">Account status</p>
+          <p className="text-xs uppercase tracking-widest text-silver/60">{t("dash.accountStatus")}</p>
           <div className="mt-3 flex items-center gap-3">
             <span className={`h-8 w-8 grid place-items-center rounded-full ${profile?.verified ? "bg-emerald-500/20 text-emerald-300" : "bg-white/5 text-silver/60"}`}>✓</span>
             <div>
-              <p className="text-sm">{profile?.verified ? "Verified seller" : "Unverified"}</p>
+              <p className="text-sm">{profile?.verified ? t("dash.verifiedSeller") : t("dash.unverified")}</p>
               <p className="text-xs text-silver/60">
-                {profile?.verified ? "Trusted seller badge active" : "Submit ID to request verification"}
+                {profile?.verified ? t("dash.trustedActive") : t("dash.submitId")}
               </p>
             </div>
-            <Link to="/verification" className="ml-auto text-xs text-gold hover:underline">Manage →</Link>
+            <Link to="/verification" className="ml-auto text-xs text-gold hover:underline">{t("dash.manage")} →</Link>
           </div>
         </div>
       </div>
