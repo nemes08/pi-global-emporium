@@ -111,17 +111,60 @@ const dictionaries: Record<LangCode, Dict> = {
   tr: partial({
     "nav.marketplace": "Pazar", "nav.sell": "Sat", "nav.categories": "Kategoriler",
     "nav.about": "Hakkında", "nav.wallet": "Pi Cüzdanı Bağla",
+
     "hero.title": "Pi Global Pazar",
     "hero.subtitle": "Tek Pazar. Sınırsız İmkan. Pi ile Güçlendirildi.",
     "hero.browse": "Pazarı Keşfet", "hero.sell": "Ürününü Sat", "hero.wallet": "Pi Cüzdanı Bağla",
+    "hero.badge": "Web3 · Pi Network Ekosistemi",
+
     "categories.title": "Kategorileri Keşfet",
+    "categories.subtitle": "Her varlık sınıfı için özenle seçilmiş pazarlar.",
     "cat.vehicles": "Araçlar", "cat.electronics": "Elektronik",
     "cat.realestate": "Emlak", "cat.luxury": "Lüks", "cat.services": "Hizmetler",
-    "search.title": "Global Arama", "search.submit": "Ara", "search.reset": "Sıfırla",
+    "cat.motorcycles": "Motosikletler", "cat.boats": "Tekneler & Yatlar",
+    "cat.trucks": "Kamyonlar", "cat.heavy-equipment": "İş Makineleri",
+    "cat.art-collectibles": "Sanat & Koleksiyon",
+    "cat.vehicles.desc": "Otomobiller, SUV'lar, elektrikli ve performans araçları.",
+    "cat.electronics.desc": "Telefonlar, dizüstü bilgisayarlar, kameralar, ses sistemleri.",
+    "cat.realestate.desc": "Evler, çatı katları, villalar, arsalar.",
+    "cat.luxury.desc": "Saatler, mücevherler, moda, koleksiyon parçaları.",
+    "cat.services.desc": "Profesyonel ve dijital hizmetler.",
+    "cat.motorcycles.desc": "Spor, tur ve macera motosikletleri.",
+    "cat.boats.desc": "Yatlar, süperyatlar, motorbotlar.",
+    "cat.trucks.desc": "Ağır kamyonlar ve ticari filo.",
+    "cat.heavy-equipment.desc": "Ekskavatörler, vinçler, endüstriyel makineler.",
+    "cat.art-collectibles.desc": "Güzel sanatlar, klasikler, nadir koleksiyon parçaları.",
+
+    "search.title": "Global Arama",
+    "search.placeholder": "Pazarda herhangi bir şey ara…",
+    "search.category": "Kategori", "search.brand": "Marka", "search.model": "Model",
+    "search.country": "Ülke", "search.city": "Şehir", "search.year": "Yıl",
+    "search.mileage": "Kilometre", "search.fuel": "Yakıt", "search.transmission": "Vites",
+    "search.condition": "Durum", "search.price": "Fiyat", "search.verified": "Doğrulanmış Satıcı",
+    "search.submit": "Ara", "search.reset": "Sıfırla", "search.any": "Herhangi",
+
+    "featured.title": "Öne Çıkan İlanlar",
+    "featured.subtitle": "Doğrulanmış satıcılardan özenle seçilmiş ürünler.",
+
     "price.seller": "Satıcı Fiyatı", "price.market": "Borsa Değeri",
-    "price.gcv": "Topluluk Ekosistem Referansı (GCV)",
+    "price.gcv": "Topluluk Ekosistem Referansı (1 Pi = 314.159 USD)",
+    "price.notice":
+      "Topluluk Ekosistem Referansı (1 Pi = 314.159 USD) bir topluluk referans değeridir ve resmi Pi Network kuru DEĞİLDİR.",
     "price.disclaimer":
-      "Topluluk Ekosistem Referansı (GCV) bir topluluk referans değeridir ve resmi Pi Network kuru değildir.",
+      "Topluluk Ekosistem Referansı (1 Pi = 314.159 USD) bir topluluk referans değeridir ve resmi Pi Network kuru değildir.",
+    "price.settings": "Fiyatlandırma Ayarları",
+    "price.gcv.label": "GCV oranı (1 Pi başına USD)",
+    "price.market.label": "Piyasa oranı (1 Pi başına USD)",
+    "price.mode": "Fiyatlandırma modu",
+    "price.mode.gcv": "Topluluk GCV Referansı",
+    "price.mode.market": "Borsa Değeri",
+    "price.mode.market.short": "Piyasa",
+
+    "footer.tagline": "Pi Network ekosistemi için premium global pazar yeri.",
+    "footer.rights": "Tüm hakları saklıdır.",
+    "footer.company": "Şirket", "footer.legal": "Yasal", "footer.resources": "Kaynaklar",
+
+    "cta.verified": "Doğrulanmış", "cta.new": "Yeni",
   }),
   de: partial({
     "hero.title": "Pi Globaler Marktplatz",
