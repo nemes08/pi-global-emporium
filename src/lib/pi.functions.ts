@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { createClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const LinkInput = z.object({
@@ -46,38 +47,90 @@ async function verifyPiAccessToken(accessToken: string): Promise<PiMeResponse> {
 }
 
 /**
- * Sign in (or silently register) with a Pi Wallet — no email/password needed.
+ * Derive a stable, unguessable password for a given Pi UID using an HMAC with
+ * a server-only secret (PI_LOGIN_SECRET). Same UID always yields the same
+ * password, so returning Pi users can "sign in" and new ones "sign up" — with
+ * no admin/service-role key needed anywhere, and no password ever stored.
+ */
+async function derivePiPassword(uid: string): Promise<string> {
+  const secret = process.env.PI_LOGIN_SECRET;
+  if (!secret) throw new Error("Missing PI_LOGIN_SECRET on the server.");
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(uid));
+  const hex = [...new Uint8Array(sig)].map((b) => b.toString(16).padStart(2, "0")).join("");
+  return `Pi!${hex}`; // prefix guarantees it satisfies typical symbol/case password rules
+}
+
+/**
+ * Sign in (or silently register) with a Pi Wallet — no email/password typed
+ * by the person, and no service-role key required anywhere.
  *
- * This delegates to the `pi-sign-in` Supabase Edge Function, which runs
- * inside Supabase's own infrastructure and has the service-role key injected
- * automatically. Cloudflare only ever needs the public anon key (already
- * configured) to call it — the service-role key never has to be copied
- * anywhere.
+ * Uses only the public anon key (already configured) plus a server-only HMAC
+ * secret (PI_LOGIN_SECRET) to derive a stable password per Pi UID:
+ * 1. Verify the Pi access token server-side via /v2/me.
+ * 2. Try signInWithPassword with the synthetic email + derived password.
+ * 3. If that account doesn't exist yet, signUp with the same credentials —
+ *    requires "Confirm email" to be OFF for the Email provider in Supabase
+ *    Auth settings, so the session comes back immediately.
+ * 4. Stamp pi_uid/pi_username onto the user's own profile row using their
+ *    own fresh session (RLS already allows a user to update their own row).
  */
 export const piSignIn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => SignInInput.parse(input))
   .handler(async ({ data }) => {
+    const me = await verifyPiAccessToken(data.accessToken);
+
     const url = process.env.SUPABASE_URL;
     const anonKey = process.env.SUPABASE_PUBLISHABLE_KEY;
     if (!url || !anonKey) {
       throw new Error("Missing SUPABASE_URL or SUPABASE_PUBLISHABLE_KEY on the server.");
     }
 
-    const res = await fetch(`${url}/functions/v1/pi-sign-in`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${anonKey}`,
-        "apikey": anonKey,
-      },
-      body: JSON.stringify({ accessToken: data.accessToken, sandbox: data.sandbox }),
+    const email = `pi-${me.uid}@pi.piglobalmarketplace.local`;
+    const password = await derivePiPassword(me.uid);
+
+    const client = createClient(url, anonKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
     });
 
-    const json = await res.json().catch(() => ({}));
-    if (!res.ok || json.error) {
-      throw new Error(json.error ?? `Pi sign-in failed (${res.status}).`);
+    let session = (await client.auth.signInWithPassword({ email, password })).data.session;
+
+    if (!session) {
+      const signUpRes = await client.auth.signUp({
+        email,
+        password,
+        options: { data: { full_name: me.username, username: me.username, pi_native: true } },
+      });
+      if (signUpRes.error) throw new Error(signUpRes.error.message);
+      session = signUpRes.data.session;
+      if (!session) {
+        throw new Error(
+          "Pi Wallet sign-in needs 'Confirm email' turned OFF for the Email provider in Supabase Auth settings.",
+        );
+      }
     }
-    return { tokenHash: json.tokenHash as string, username: json.username as string };
+
+    const authedClient = createClient(url, anonKey, {
+      global: { headers: { Authorization: `Bearer ${session.access_token}` } },
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    await authedClient
+      .from("profiles")
+      .update({ pi_uid: me.uid, pi_username: me.username, pi_sandbox: data.sandbox })
+      .eq("id", session.user.id);
+
+    return {
+      accessToken: session.access_token,
+      refreshToken: session.refresh_token,
+      username: me.username,
+    };
   });
 
 /**
