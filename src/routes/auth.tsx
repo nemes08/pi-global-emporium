@@ -1,11 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
+import { isPiBrowser, piAuthenticate } from "@/lib/pi-sdk";
+import { piSignIn } from "@/lib/pi.functions";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -25,6 +28,7 @@ const passwordSchema = z.string().min(8).max(72);
 function AuthPage() {
   const { session, loading } = useAuth();
   const navigate = useNavigate();
+  const signIn = useServerFn(piSignIn);
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,10 +37,30 @@ function AuthPage() {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [piBusy, setPiBusy] = useState(false);
+  const [piErr, setPiErr] = useState<string | null>(null);
+  const inPiBrowser = typeof window !== "undefined" && isPiBrowser();
 
   useEffect(() => {
     if (!loading && session) navigate({ to: "/dashboard" });
   }, [session, loading, navigate]);
+
+  async function signInWithPi() {
+    setPiErr(null); setPiBusy(true);
+    try {
+      // sandbox=false -> mainnet. Flip to true only while testing in the
+      // Pi Testnet Sandbox inside the Pi Developer Portal.
+      const authed = await piAuthenticate(false);
+      const r = await signIn({ data: { accessToken: authed.accessToken, sandbox: false } });
+      const { error } = await supabase.auth.verifyOtp({ type: "magiclink", token_hash: r.tokenHash });
+      if (error) throw error;
+      navigate({ to: "/dashboard" });
+    } catch (e) {
+      setPiErr(e instanceof Error ? e.message : "Pi Wallet sign-in failed.");
+    } finally {
+      setPiBusy(false);
+    }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -88,7 +112,29 @@ function AuthPage() {
             </p>
           </div>
 
-          <div className="flex rounded-full border border-white/10 bg-white/5 p-1 mb-6">
+          <button
+            type="button"
+            onClick={signInWithPi}
+            disabled={piBusy}
+            className="btn-gold w-full rounded-full px-4 py-2.5 text-sm font-semibold disabled:opacity-60 flex items-center justify-center gap-2"
+          >
+            <span className="font-black">π</span>
+            {piBusy ? "Connecting…" : "Sign in with Pi Wallet"}
+          </button>
+          <p className="text-[10px] text-silver/50 text-center mt-2">
+            {inPiBrowser
+              ? "Pi Browser detected — this signs you in instantly, no password needed."
+              : "Open this page inside the Pi Browser to sign in with your Pi Wallet."}
+          </p>
+
+          {piErr && <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300 mt-3">{piErr}</div>}
+
+          <details className="mt-6 pt-5 border-t border-white/10">
+            <summary className="cursor-pointer text-xs text-silver/60 text-center select-none">
+              Not on the Pi Browser? Use email instead
+            </summary>
+
+          <div className="flex rounded-full border border-white/10 bg-white/5 p-1 mb-6 mt-4">
             <button
               onClick={() => { setMode("signin"); setErr(null); setMsg(null); }}
               className={`flex-1 rounded-full px-3 py-1.5 text-xs font-medium transition ${mode === "signin" ? "btn-gold text-onyx" : "text-silver/80"}`}
@@ -122,19 +168,7 @@ function AuthPage() {
               {busy ? "Please wait…" : mode === "signin" ? "Sign In" : "Create Account"}
             </button>
           </form>
-
-          <div className="mt-6 pt-5 border-t border-white/10 space-y-2">
-            <button
-              disabled
-              className="w-full rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-silver/60"
-              title="Available inside Pi Browser"
-            >
-              Sign in with Pi Wallet · Coming soon
-            </button>
-            <p className="text-[10px] text-silver/50 text-center">
-              Pi Wallet sign-in activates automatically when the app is opened inside the Pi Browser.
-            </p>
-          </div>
+          </details>
         </div>
       </main>
       <Footer />
