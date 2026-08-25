@@ -35,7 +35,12 @@ const Ctx = createContext<PricingCtx | null>(null);
 
 export function PricingProvider({ children }: { children: ReactNode }) {
   const [rates, setRatesState] = useState<FxRates>(DEFAULT_RATES);
-  const [mode, setModeState] = useState<PricingMode>("gcv");
+  // Default to the real market rate. GCV ($314,159/π) is an unofficial,
+  // speculative community figure with no backing on any exchange — shipping
+  // it as the default price basis misrepresents real prices to buyers and
+  // risks rejection under Pi Network's rules against fiat-equivalent/
+  // speculative pricing. Keep it available as an opt-in toggle only.
+  const [mode, setModeState] = useState<PricingMode>("market");
 
   useEffect(() => {
     try {
