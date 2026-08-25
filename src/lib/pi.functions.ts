@@ -48,86 +48,36 @@ async function verifyPiAccessToken(accessToken: string): Promise<PiMeResponse> {
 /**
  * Sign in (or silently register) with a Pi Wallet — no email/password needed.
  *
- * Flow:
- * 1. Verify the Pi access token server-side via /v2/me (never trust the client).
- * 2. Look up a profile already linked to this pi_uid.
- *    - Found  -> reuse that Supabase auth user.
- *    - Not found -> create a new Supabase auth user with a synthetic,
- *      unguessable @pi.local email (the user never sees or uses this email;
- *      it exists only because Supabase Auth requires an identifier). The
- *      `handle_new_user` trigger creates the matching profiles row, which we
- *      then stamp with pi_uid / pi_username via the service-role client.
- * 3. Mint a one-time magic-link token via the Admin API and return its
- *    token_hash to the client. The client calls `supabase.auth.verifyOtp`
- *    with it to establish a real session — no email is ever sent.
- *
- * IMPORTANT: this file is a `*.functions.ts` file and ships to the client
- * bundle, so the service-role client is imported dynamically inside the
- * handler (server-only) rather than at module scope.
+ * This delegates to the `pi-sign-in` Supabase Edge Function, which runs
+ * inside Supabase's own infrastructure and has the service-role key injected
+ * automatically. Cloudflare only ever needs the public anon key (already
+ * configured) to call it — the service-role key never has to be copied
+ * anywhere.
  */
 export const piSignIn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => SignInInput.parse(input))
   .handler(async ({ data }) => {
-    const me = await verifyPiAccessToken(data.accessToken);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-    const { data: existing, error: lookupError } = await supabaseAdmin
-      .from("profiles")
-      .select("id")
-      .eq("pi_uid", me.uid)
-      .maybeSingle();
-    if (lookupError) throw new Error(lookupError.message);
-
-    let userId: string;
-    let email: string;
-
-    if (existing?.id) {
-      userId = existing.id;
-      const { data: userRes, error: getUserError } = await supabaseAdmin.auth.admin.getUserById(userId);
-      if (getUserError || !userRes?.user?.email) {
-        throw new Error("Could not resolve the linked account for this Pi Wallet.");
-      }
-      email = userRes.user.email;
-
-      // Keep the sandbox/mainnet flag and username fresh on every sign-in.
-      await supabaseAdmin
-        .from("profiles")
-        .update({ pi_username: me.username, pi_sandbox: data.sandbox })
-        .eq("id", userId);
-    } else {
-      // Synthetic, unguessable email — never displayed or emailed to anyone.
-      email = `pi-${me.uid}@pi.piglobalmarketplace.local`;
-      const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({
-        email,
-        email_confirm: true,
-        user_metadata: { full_name: me.username, username: me.username, pi_native: true },
-      });
-      if (createError || !created?.user) {
-        throw new Error(createError?.message ?? "Could not create a Pi Wallet account.");
-      }
-      userId = created.user.id;
-
-      // handle_new_user's trigger creates the profiles row asynchronously
-      // within the same transaction; stamp the Pi identity onto it now.
-      const { error: stampError } = await supabaseAdmin
-        .from("profiles")
-        .update({ pi_uid: me.uid, pi_username: me.username, pi_sandbox: data.sandbox })
-        .eq("id", userId);
-      if (stampError) throw new Error(stampError.message);
+    const url = process.env.SUPABASE_URL;
+    const anonKey = process.env.SUPABASE_PUBLISHABLE_KEY;
+    if (!url || !anonKey) {
+      throw new Error("Missing SUPABASE_URL or SUPABASE_PUBLISHABLE_KEY on the server.");
     }
 
-    const { data: link, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-      type: "magiclink",
-      email,
+    const res = await fetch(`${url}/functions/v1/pi-sign-in`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${anonKey}`,
+        "apikey": anonKey,
+      },
+      body: JSON.stringify({ accessToken: data.accessToken, sandbox: data.sandbox }),
     });
-    if (linkError || !link?.properties?.hashed_token) {
-      throw new Error(linkError?.message ?? "Could not start a Pi Wallet session.");
-    }
 
-    return {
-      tokenHash: link.properties.hashed_token,
-      username: me.username,
-    };
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok || json.error) {
+      throw new Error(json.error ?? `Pi sign-in failed (${res.status}).`);
+    }
+    return { tokenHash: json.tokenHash as string, username: json.username as string };
   });
 
 /**
