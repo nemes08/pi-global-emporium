@@ -52,7 +52,10 @@ function AuthPage() {
       // Pi Testnet Sandbox inside the Pi Developer Portal.
       const authed = await piAuthenticate(false);
       const r = await signIn({ data: { accessToken: authed.accessToken, sandbox: false } });
-      const { error } = await supabase.auth.verifyOtp({ type: "magiclink", token_hash: r.tokenHash });
+      const { error } = await supabase.auth.setSession({
+        access_token: r.accessToken,
+        refresh_token: r.refreshToken,
+      });
       if (error) throw error;
       navigate({ to: "/dashboard" });
     } catch (e) {
