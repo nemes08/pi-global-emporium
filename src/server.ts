@@ -47,6 +47,19 @@ function isH3SwallowedErrorBody(body: string): boolean {
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      // Cloudflare passes secrets/vars via the `env` binding object, not the
+      // OS environment — but the rest of this app (Supabase clients, Pi
+      // config, server functions) reads them via `process.env.X`. Copy the
+      // string-valued bindings onto process.env once per request so every
+      // existing `process.env.SUPABASE_URL`-style read actually resolves.
+      if (env && typeof env === "object") {
+        for (const [key, value] of Object.entries(env as Record<string, unknown>)) {
+          if (typeof value === "string") {
+            (process.env as Record<string, string>)[key] = value;
+          }
+        }
+      }
+
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
