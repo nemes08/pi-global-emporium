@@ -53,11 +53,19 @@ export default {
       // string-valued bindings onto process.env once per request so every
       // existing `process.env.SUPABASE_URL`-style read actually resolves.
       if (env && typeof env === "object") {
+        const keys = Object.keys(env as Record<string, unknown>);
+        console.log("[env-diagnostic] keys available on env:", JSON.stringify(keys));
         for (const [key, value] of Object.entries(env as Record<string, unknown>)) {
           if (typeof value === "string") {
             (process.env as Record<string, string>)[key] = value;
           }
         }
+        console.log(
+          "[env-diagnostic] process.env.SUPABASE_URL after copy:",
+          process.env.SUPABASE_URL ? "SET" : "MISSING",
+        );
+      } else {
+        console.log("[env-diagnostic] env is not an object:", typeof env, env);
       }
 
       const handler = await getServerEntry();
