@@ -87,8 +87,8 @@ export const piSignIn = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const me = await verifyPiAccessToken(data.accessToken);
 
-    const url = process.env.SUPABASE_URL;
-    const anonKey = process.env.SUPABASE_PUBLISHABLE_KEY;
+    const url = process.env.SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL;
+    const anonKey = process.env.SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
     if (!url || !anonKey) {
       throw new Error("Missing SUPABASE_URL or SUPABASE_PUBLISHABLE_KEY on the server.");
     }
