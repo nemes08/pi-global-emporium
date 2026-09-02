@@ -20,11 +20,6 @@ type PiMeResponse = {
   username: string;
 };
 
-/**
- * Verify a Pi Platform access token against Pi's `/v2/me` endpoint. Shared by
- * both the sign-in flow (below) and the link/unlink flow. Never trust a
- * client-supplied uid/username directly.
- */
 async function verifyPiAccessToken(accessToken: string): Promise<PiMeResponse> {
   const res = await fetch("https://api.minepi.com/v2/me", {
     method: "GET",
@@ -46,12 +41,6 @@ async function verifyPiAccessToken(accessToken: string): Promise<PiMeResponse> {
   return me;
 }
 
-/**
- * Derive a stable, unguessable password for a given Pi UID using an HMAC with
- * a server-only secret (PI_LOGIN_SECRET). Same UID always yields the same
- * password, so returning Pi users can "sign in" and new ones "sign up" — with
- * no admin/service-role key needed anywhere, and no password ever stored.
- */
 async function derivePiPassword(uid: string): Promise<string> {
   const secret = process.env.PI_LOGIN_SECRET;
   if (!secret) throw new Error("Missing PI_LOGIN_SECRET on the server.");
@@ -65,23 +54,9 @@ async function derivePiPassword(uid: string): Promise<string> {
   );
   const sig = await crypto.subtle.sign("HMAC", key, enc.encode(uid));
   const hex = [...new Uint8Array(sig)].map((b) => b.toString(16).padStart(2, "0")).join("");
-  return `Pi!${hex}`; // prefix guarantees it satisfies typical symbol/case password rules
+  return `Pi!${hex}`;
 }
 
-/**
- * Sign in (or silently register) with a Pi Wallet — no email/password typed
- * by the person, and no service-role key required anywhere.
- *
- * Uses only the public anon key (already configured) plus a server-only HMAC
- * secret (PI_LOGIN_SECRET) to derive a stable password per Pi UID:
- * 1. Verify the Pi access token server-side via /v2/me.
- * 2. Try signInWithPassword with the synthetic email + derived password.
- * 3. If that account doesn't exist yet, signUp with the same credentials —
- *    requires "Confirm email" to be OFF for the Email provider in Supabase
- *    Auth settings, so the session comes back immediately.
- * 4. Stamp pi_uid/pi_username onto the user's own profile row using their
- *    own fresh session (RLS already allows a user to update their own row).
- */
 export const piSignIn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => SignInInput.parse(input))
   .handler(async ({ data }) => {
@@ -111,6 +86,10 @@ export const piSignIn = createServerFn({ method: "POST" })
       if (signUpRes.error) throw new Error(signUpRes.error.message);
       session = signUpRes.data.session;
       if (!session) {
+        const retry = await client.auth.signInWithPassword({ email, password });
+        session = retry.data.session;
+      }
+      if (!session) {
         throw new Error(
           "Pi Wallet sign-in needs 'Confirm email' turned OFF for the Email provider in Supabase Auth settings.",
         );
@@ -133,13 +112,6 @@ export const piSignIn = createServerFn({ method: "POST" })
     };
   });
 
-/**
- * Verify a Pi Platform access token by calling `/v2/me` on Pi's API, then link
- * the resulting Pi UID + username to the authenticated user's profile.
- *
- * Never trust the client-supplied UID/username directly — always resolve them
- * through Pi's server so a malicious client cannot claim another Pi account.
- */
 export const linkPiIdentity = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => LinkInput.parse(input))
