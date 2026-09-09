@@ -71,3 +71,40 @@ Mevcut kod tabanı korunur. Tasarım, marketplace mantığı, Supabase şeması 
 
 - Pi Developer Portal: production domain, Mainnet app konfigürasyonu, validation key doğrulaması.
 - Gerçek Pi Browser cihaz testi (giriş, ödeme, sipariş).
+
+## F. Ek uyum kontrolleri (talep edildi)
+
+### 1. Domain / marka uyumu
+- Mevcut yayın adresi `pi-global-emporium.lovable.app` — Pi'nin listeleme kuralları domain adının "pi" ile başlamasını istemiyor. Bu **risk** olarak raporlanacak.
+- Öneri: uygulamanın adı korunarak "pi" ile başlamayan bir production domain kullanılması (örn. `globalemporium...`). Kod tarafı domain'e bağımlı değil; yalnızca canonical URL, sitemap, robots ve OG etiketleri tek bir yerden okunacak şekilde toplanacak, böylece domain değişikliği tek noktadan yapılabilir.
+- Metinler taranıp "official Pi", "Pi Network onaylı" izlenimi verebilecek her ifade, bağımsız topluluk uygulaması ifadesiyle değiştirilecek.
+
+### 2. GCV / fiat gösterimi
+- İşlem para birimi yalnızca Pi. USD/EUR/TRY ve GCV her yerde "bilgilendirici referans" etiketiyle gösterilecek; ödeme adımında yalnızca Pi tutarı esas alınacak.
+- "Community reference value – not an official Pi Network price." disclaimer'ı fiyatın göründüğü tüm yüzeylerde (kart, detay, sepet/checkout, escrow, sipariş) tekil bir bileşenden gelecek.
+- Fiat ile ödeme akışı eklenmeyecek.
+
+### 3. A2U / escrow güvenlik denetimi
+- Fonlanmamış escrow release edilemez (DB tetikleyicisi ile durum geçişi kısıtı; admin dahil).
+- Aynı escrow iki kez release edilemez; aynı Pi payment iki kez işlenemez (payment id üzerinde tekil kısıt + koşullu güncelleme).
+- Refund yalnızca fonlanmış/kargolanmış/anlaşmazlık durumlarından yapılabilir.
+- Seed/gizli anahtar yalnızca sunucu ortam değişkeninde; istemciye hiçbir gizli değer gitmez; kullanıcıdan seed/passphrase istenmez.
+- Admin yetkisi RLS + sunucu tarafı rol kontrolüyle doğrulanır (frontend kontrolü yalnızca görünüm).
+- Tüm release/refund ve admin müdahaleleri `activity_logs`'a yazılır.
+
+### 4. Order / payment state machine
+- Payment: PENDING → APPROVED → COMPLETED, ayrıca FAILED / CANCELLED / REFUNDED.
+- Order: PENDING_PAYMENT → PAID → PROCESSING → SHIPPED → DELIVERED → COMPLETED, ayrıca CANCELLED / DISPUTED / REFUNDED.
+- Payment COMPLETED (sunucu doğrulaması) olmadan order PAID/COMPLETED olamaz — DB seviyesinde zorlanır. Mevcut durum adları geriye dönük uyumlu şekilde eşlenir, kolon düşürülmez.
+
+### 5. Mainnet / testnet ayrımı
+- Ağ yalnızca sunucudaki `PI_NETWORK` değerinden belirlenir; istemcide ağ seçimi kalmaz. Testnet yalnızca geliştirme ortamında.
+
+### 6-9. Auth, ödeme doğrulaması, veri gizliliği, harici yönlendirme
+- Pi SDK + `/v2/me` doğrulaması uçtan uca test edilir; e-posta/şifre birincil giriş olmaktan çıkarılır.
+- "Ödeme başarılı" ifadesi yalnızca sunucu completion doğrulamasından sonra gösterilir.
+- Zorunlu olmayan kişisel veri alanları (telefon, e-posta, tam yasal ad gibi) gözden geçirilir; yalnızca ilan iletişimi ve doğrulama için gerekli olanlar kalır, geri kalanı isteğe bağlı olur.
+- Temel akışların (giriş, arama, ilan, ödeme, sipariş) hiçbir adımı harici siteye yönlendirmeye ihtiyaç duymayacak şekilde kontrol edilir.
+
+### 10. Final uyum tablosu
+İş bittiğinde Authentication, Pi SDK, Pi Payment, A2U, Escrow, Orders, Supabase/RLS, Security, Domain, Pi Branding, GCV, Data Privacy, External Links, Mobile/Pi Browser, Mainnet Configuration, Developer Portal, Production Build başlıkları PASS / WARNING / FAIL olarak raporlanır; her WARNING/FAIL için yapılacak iş yazılır. Bu tablo tamamlanmadan "Mainnet-ready" ifadesi kullanılmaz.
