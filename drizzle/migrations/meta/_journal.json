@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1789023317699,
+      "tag": "0000_mainnet_indexes_moderation_default",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789023360724,
+      "tag": "0001_escrow_settlement_guards",
+      "breakpoints": true
+    }
+  ]
+}
