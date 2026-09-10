@@ -47,17 +47,46 @@ export type MarketplaceItem = {
   seller: SellerLite | null;
 };
 
-export async function fetchMarketplace(
+export type MarketplacePage = {
+  items: MarketplaceItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
+export const PAGE_SIZE = 24;
+
+/**
+ * Public marketplace query. Only listings that are active AND approved by
+ * moderation are visible here; the "verified sellers" filter is applied inside
+ * the query (never after paging) so page counts stay correct.
+ */
+export async function fetchMarketplacePage(
   filters: MarketplaceFilters,
   sort: SortKey,
-  limit = 48,
-): Promise<MarketplaceItem[]> {
-  const sel = (s: string): string => s;
+  page = 0,
+  pageSize = PAGE_SIZE,
+): Promise<MarketplacePage> {
+  let verifiedSellerIds: string[] | null = null;
+  if (filters.verified) {
+    const { data } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("verified", true)
+      .returns<{ id: string }[]>();
+    verifiedSellerIds = (data ?? []).map((r) => r.id);
+    if (verifiedSellerIds.length === 0) {
+      return { items: [], total: 0, page: 0, pageSize };
+    }
+  }
+
   let q = supabase
     .from("listings")
-    .select(sel("*"))
-    .eq("status", "active");
+    .select("*", { count: "exact" })
+    .eq("status", "active")
+    .eq("moderation_status", "approved");
 
+  if (verifiedSellerIds) q = q.in("seller_id", verifiedSellerIds);
   if (filters.category) q = q.eq("category", filters.category);
   if (filters.brand) q = q.ilike("brand", filters.brand);
   if (filters.model) q = q.ilike("model", `%${filters.model}%`);
@@ -83,8 +112,9 @@ export async function fetchMarketplace(
     default: q = q.order("created_at", { ascending: false });
   }
 
-  const { data, error } = await q.limit(limit).returns<ListingRow[]>();
-  if (error || !data) return [];
+  const from = page * pageSize;
+  const { data, error, count } = await q.range(from, from + pageSize - 1).returns<ListingRow[]>();
+  if (error || !data) return { items: [], total: 0, page, pageSize };
 
   const sellerIds = Array.from(new Set(data.map((l) => l.seller_id)));
   let sellers: SellerLite[] = [];
@@ -98,16 +128,24 @@ export async function fetchMarketplace(
   }
   const sellerMap = new Map(sellers.map((s) => [s.id, s]));
 
-  let items: MarketplaceItem[] = data.map((listing) => ({
-    listing,
-    seller: sellerMap.get(listing.seller_id) ?? null,
-  }));
+  return {
+    items: data.map((listing) => ({
+      listing,
+      seller: sellerMap.get(listing.seller_id) ?? null,
+    })),
+    total: count ?? data.length,
+    page,
+    pageSize,
+  };
+}
 
-  if (filters.verified) {
-    items = items.filter((i) => i.seller?.verified);
-  }
-
-  return items;
+/** Convenience wrapper for surfaces that only need a single page of items. */
+export async function fetchMarketplace(
+  filters: MarketplaceFilters,
+  sort: SortKey,
+  limit = PAGE_SIZE,
+): Promise<MarketplaceItem[]> {
+  return (await fetchMarketplacePage(filters, sort, 0, limit)).items;
 }
 
 export async function fetchFeatured(limit = 8): Promise<MarketplaceItem[]> {

@@ -3,22 +3,32 @@ import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const LinkInput = z.object({
+/**
+ * The Pi network (mainnet vs testnet) is a SERVER decision, read from the
+ * PI_NETWORK secret. The client never chooses it and any value it sends is
+ * ignored — this keeps production strictly on Mainnet.
+ */
+function serverUsesSandbox(): boolean {
+  const raw = (process.env["PI_NETWORK"] ?? "mainnet").trim().toLowerCase();
+  return raw === "testnet" || raw === "sandbox";
+}
+
+const TokenInput = z.object({
   accessToken: z.string().min(10).max(4000),
-  sandbox: z.boolean().default(true),
 });
 
 const UnlinkInput = z.object({});
-
-const SignInInput = z.object({
-  accessToken: z.string().min(10).max(4000),
-  sandbox: z.boolean().default(true),
-});
 
 type PiMeResponse = {
   uid: string;
   username: string;
 };
+
+/** Public, non-secret runtime configuration the Pi SDK needs in the browser. */
+export const piNetworkConfig = createServerFn({ method: "GET" }).handler(async () => ({
+  sandbox: serverUsesSandbox(),
+  network: serverUsesSandbox() ? ("testnet" as const) : ("mainnet" as const),
+}));
 
 async function verifyPiAccessToken(accessToken: string): Promise<PiMeResponse> {
   const res = await fetch("https://api.minepi.com/v2/me", {
@@ -30,20 +40,22 @@ async function verifyPiAccessToken(accessToken: string): Promise<PiMeResponse> {
   });
 
   if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`Pi identity verification failed (${res.status}): ${body.slice(0, 160)}`);
+    if (res.status === 401 || res.status === 403) {
+      throw new Error("Pi sign-in could not be verified. Please try signing in again from the Pi Browser.");
+    }
+    throw new Error("Pi identity service is unavailable right now. Please try again in a moment.");
   }
 
   const me = (await res.json()) as PiMeResponse;
   if (!me?.uid || !me?.username) {
-    throw new Error("Pi identity verification returned an unexpected payload.");
+    throw new Error("Pi identity verification returned an unexpected response.");
   }
   return me;
 }
 
 async function derivePiPassword(uid: string): Promise<string> {
-  const secret = process.env.PI_LOGIN_SECRET;
-  if (!secret) throw new Error("Missing PI_LOGIN_SECRET on the server.");
+  const secret = process.env["PI_LOGIN_SECRET"];
+  if (!secret) throw new Error("Pi sign-in is not configured on the server yet.");
   const enc = new TextEncoder();
   const key = await crypto.subtle.importKey(
     "raw",
@@ -58,16 +70,19 @@ async function derivePiPassword(uid: string): Promise<string> {
 }
 
 export const piSignIn = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => SignInInput.parse(input))
+  .inputValidator((input: unknown) => TokenInput.parse(input))
   .handler(async ({ data }) => {
     const me = await verifyPiAccessToken(data.accessToken);
+    const sandbox = serverUsesSandbox();
 
-    const url = process.env.SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL;
-    const anonKey = process.env.SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    const url = process.env["SUPABASE_URL"];
+    const anonKey = process.env["SUPABASE_PUBLISHABLE_KEY"];
     if (!url || !anonKey) {
-      throw new Error("Missing SUPABASE_URL or SUPABASE_PUBLISHABLE_KEY on the server.");
+      throw new Error("Backend configuration is incomplete on the server.");
     }
 
+    // Deterministic, non-contactable internal identifier. No real email address
+    // is ever collected: Pi UID is the only identity we store.
     const email = `pi-${me.uid}@pi.piglobalmarketplace.local`;
     const password = await derivePiPassword(me.uid);
 
@@ -90,9 +105,7 @@ export const piSignIn = createServerFn({ method: "POST" })
         session = retry.data.session;
       }
       if (!session) {
-        throw new Error(
-          "Pi Wallet sign-in needs 'Confirm email' turned OFF for the Email provider in Supabase Auth settings.",
-        );
+        throw new Error("Your Pi account could not be opened. Please try again.");
       }
     }
 
@@ -102,33 +115,35 @@ export const piSignIn = createServerFn({ method: "POST" })
     });
     await authedClient
       .from("profiles")
-      .update({ pi_uid: me.uid, pi_username: me.username, pi_sandbox: data.sandbox })
+      .update({ pi_uid: me.uid, pi_username: me.username, pi_sandbox: sandbox })
       .eq("id", session.user.id);
 
     return {
       accessToken: session.access_token,
       refreshToken: session.refresh_token,
       username: me.username,
+      sandbox,
     };
   });
 
 export const linkPiIdentity = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => LinkInput.parse(input))
+  .inputValidator((input: unknown) => TokenInput.parse(input))
   .handler(async ({ data, context }) => {
     const me = await verifyPiAccessToken(data.accessToken);
+    const sandbox = serverUsesSandbox();
     const { supabase, userId } = context;
     const { error } = await supabase
       .from("profiles")
       .update({
         pi_uid: me.uid,
         pi_username: me.username,
-        pi_sandbox: data.sandbox,
+        pi_sandbox: sandbox,
       })
       .eq("id", userId);
 
     if (error) throw new Error(error.message);
-    return { uid: me.uid, username: me.username, sandbox: data.sandbox };
+    return { uid: me.uid, username: me.username, sandbox };
   });
 
 export const unlinkPiIdentity = createServerFn({ method: "POST" })
