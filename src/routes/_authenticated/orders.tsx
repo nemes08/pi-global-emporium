@@ -85,6 +85,12 @@ function OrdersPage() {
         ))}
       </div>
 
+      {err && (
+        <div role="alert" className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
+          {err}
+        </div>
+      )}
+
       {isLoading ? (
         <div className="text-sm text-silver/60">Loading…</div>
       ) : !data || data.length === 0 ? (

@@ -8,7 +8,7 @@ import { Footer } from "@/components/Footer";
 import { SearchBar, emptyFilters, type SearchFilters } from "@/components/SearchBar";
 import { SmartSearch } from "@/components/SmartSearch";
 import { MarketplaceCard } from "@/components/MarketplaceCard";
-import { fetchMarketplace, SORT_LABEL, type SortKey } from "@/lib/marketplace";
+import { fetchMarketplacePage, PAGE_SIZE, SORT_LABEL, type SortKey } from "@/lib/marketplace";
 import { useI18n } from "@/lib/i18n";
 
 const searchSchema = z.object({
