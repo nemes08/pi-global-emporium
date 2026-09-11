@@ -88,6 +88,7 @@ function Marketplace() {
         <div className="mt-6 space-y-4">
           <SmartSearch
             onResult={(r) => {
+              setPage(0);
               setFilters((prev) => ({
                 ...prev,
                 q: r.q ?? prev.q,
