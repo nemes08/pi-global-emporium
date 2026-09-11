@@ -38,13 +38,22 @@ function Marketplace() {
   const [filters, setFilters] = useState<SearchFilters>({ ...emptyFilters, category });
   const [sort, setSort] = useState<SortKey>("featured");
   const [view, setView] = useState<"grid" | "list">("grid");
+  const [page, setPage] = useState(0);
 
-  const { data: items = [], isLoading } = useQuery({
-    queryKey: ["marketplace", filters, sort],
-    queryFn: () => fetchMarketplace(filters, sort),
+  const { data, isLoading } = useQuery({
+    queryKey: ["marketplace", filters, sort, page],
+    queryFn: () => fetchMarketplacePage(filters, sort, page),
   });
 
+  const items = data?.items ?? [];
+  const total = data?.total ?? 0;
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const count = items.length;
+
+  function applyFilters(next: SearchFilters) {
+    setFilters(next);
+    setPage(0);
+  }
   const activeChips = useMemo(() => {
     const chips: { k: keyof SearchFilters; label: string }[] = [];
     (Object.keys(filters) as (keyof SearchFilters)[]).forEach((k) => {
