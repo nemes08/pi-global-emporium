@@ -78,8 +78,10 @@ function Marketplace() {
             <h1 className="font-display text-3xl sm:text-4xl text-silver">{t("nav.marketplace")}</h1>
             <p className="mt-2 text-sm text-muted-foreground">{t("featured.subtitle")}</p>
           </div>
-          <p className="text-xs text-silver/60">
-            {isLoading ? "Loading listings…" : `${count} ${count === 1 ? "listing" : "listings"}`}
+          <p className="text-xs text-silver/60" aria-live="polite">
+            {isLoading
+              ? "Loading listings…"
+              : `${total.toLocaleString()} ${total === 1 ? "listing" : "listings"}${pages > 1 ? ` · page ${page + 1} of ${pages}` : ""}`}
           </p>
         </div>
 
