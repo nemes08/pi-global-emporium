@@ -33,6 +33,7 @@ function OrdersPage() {
   const qc = useQueryClient();
   const [uid, setUid] = useState<string | null>(null);
   const [tab, setTab] = useState<"purchases" | "sales">("purchases");
+  const [err, setErr] = useState<string | null>(null);
   const { usdPerPi } = usePricing();
   useEffect(() => { supabase.auth.getUser().then(({ data }) => setUid(data.user?.id ?? null)); }, []);
 
