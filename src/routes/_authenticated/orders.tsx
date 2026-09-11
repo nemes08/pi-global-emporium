@@ -29,6 +29,19 @@ type OrderRow = {
   listings: { title: string | null } | null;
 };
 
+/**
+ * Transitions a seller may perform. "paid" is intentionally absent: only the
+ * server-side Pi payment verifier can mark an order as paid.
+ */
+const SELLER_NEXT: Record<OrderRow["status"], OrderRow["status"][]> = {
+  pending: ["cancelled"],
+  paid: ["shipped", "refunded"],
+  shipped: ["completed", "refunded"],
+  completed: [],
+  cancelled: [],
+  refunded: [],
+};
+
 function OrdersPage() {
   const qc = useQueryClient();
   const [uid, setUid] = useState<string | null>(null);
