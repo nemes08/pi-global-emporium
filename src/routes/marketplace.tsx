@@ -124,7 +124,7 @@ function Marketplace() {
             <label className="text-[10px] uppercase tracking-widest text-silver/60">Sort</label>
             <select
               value={sort}
-              onChange={(e) => setSort(e.target.value as SortKey)}
+              onChange={(e) => { setPage(0); setSort(e.target.value as SortKey); }}
               className="rounded-full border border-white/10 bg-black/40 px-3 py-1.5 text-xs text-silver focus:outline-none focus:ring-2 focus:ring-gold/40"
             >
               {SORTS.map((s) => <option key={s} value={s} className="bg-onyx">{SORT_LABEL[s]}</option>)}
