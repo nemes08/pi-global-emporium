@@ -48,7 +48,12 @@ function OrdersPage() {
   });
 
   async function updateStatus(id: string, status: OrderRow["status"]) {
-    await supabase.from("orders").update({ status }).eq("id", id);
+    setErr(null);
+    const { error } = await supabase.from("orders").update({ status }).eq("id", id);
+    if (error) {
+      setErr(error.message);
+      return;
+    }
     qc.invalidateQueries({ queryKey: ["orders", uid, tab] });
   }
 

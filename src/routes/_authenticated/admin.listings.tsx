@@ -64,6 +64,8 @@ function AdminListings() {
     const note = next === "rejected" ? window.prompt("Reason shown to the seller (optional):") ?? null : null;
     const patch: Record<string, unknown> = { moderation_status: next, moderation_note: note };
     if (next === "rejected") patch["status"] = "archived";
+    // Approving a previously rejected listing puts it back on sale.
+    if (next === "approved" && (row.status === "archived" || row.status === "draft")) patch["status"] = "active";
     await supabase.from("listings").update(patch as never).eq("id", row.id);
     await supabase.from("notifications").insert({
       user_id: row.seller_id,
