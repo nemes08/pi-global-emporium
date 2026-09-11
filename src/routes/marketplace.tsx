@@ -65,6 +65,7 @@ function Marketplace() {
   }, [filters]);
 
   function clearChip(k: keyof SearchFilters) {
+    setPage(0);
     setFilters((f) => ({ ...f, [k]: (typeof f[k] === "boolean" ? false : "") as never }));
   }
 
