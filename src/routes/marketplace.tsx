@@ -105,7 +105,7 @@ function Marketplace() {
               if (r.sort) setSort(r.sort);
             }}
           />
-          <SearchBar value={filters} onSubmit={setFilters} />
+          <SearchBar value={filters} onSubmit={applyFilters} />
         </div>
 
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
