@@ -1,57 +1,55 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { z } from "zod";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useAuth } from "@/lib/auth";
-import { useI18n } from "@/lib/i18n";
 import { isPiBrowser, piAuthenticate } from "@/lib/pi-sdk";
-import { piSignIn } from "@/lib/pi.functions";
+import { piNetworkConfig, piSignIn } from "@/lib/pi.functions";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign In · Pi Global Marketplace" },
-      { name: "description", content: "Sign in or create your Pi Global Marketplace account to buy, sell and manage listings in the Pi ecosystem." },
-      { property: "og:title", content: "Sign In · Pi Global Marketplace" },
-      { property: "og:description", content: "Sign in or create your Pi Global Marketplace account." },
+      { title: "Sign in with Pi · Pi Global Marketplace" },
+      { name: "description", content: "Sign in to Pi Global Marketplace with Pi Authentication from the Pi Browser. No password, no email address needed." },
+      { property: "og:title", content: "Sign in with Pi · Pi Global Marketplace" },
+      { property: "og:description", content: "Sign in with Pi Authentication from the Pi Browser." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: AuthPage,
 });
 
-const emailSchema = z.string().trim().email().max(255);
-const passwordSchema = z.string().min(8).max(72);
-
 function AuthPage() {
   const { session, loading } = useAuth();
   const navigate = useNavigate();
   const signIn = useServerFn(piSignIn);
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [username, setUsername] = useState("");
+  const netConfig = useServerFn(piNetworkConfig);
   const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
-  const [piBusy, setPiBusy] = useState(false);
-  const [piErr, setPiErr] = useState<string | null>(null);
   const inPiBrowser = typeof window !== "undefined" && isPiBrowser();
+
+  const { data: net } = useQuery({
+    queryKey: ["pi-network-config"],
+    queryFn: () => netConfig(),
+    staleTime: 60 * 60 * 1000,
+  });
 
   useEffect(() => {
     if (!loading && session) navigate({ to: "/dashboard" });
   }, [session, loading, navigate]);
 
   async function signInWithPi() {
-    setPiErr(null); setPiBusy(true);
+    setErr(null);
+    setBusy(true);
     try {
-      // sandbox=false -> mainnet. Flip to true only while testing in the
-      // Pi Testnet Sandbox inside the Pi Developer Portal.
-      const authed = await piAuthenticate(false);
-      const r = await signIn({ data: { accessToken: authed.accessToken, sandbox: false } });
+      // The network comes from server configuration — never from the browser.
+      const cfg = net ?? (await netConfig());
+      const authed = await piAuthenticate(cfg.sandbox);
+      const r = await signIn({ data: { accessToken: authed.accessToken } });
       const { error } = await supabase.auth.setSession({
         access_token: r.accessToken,
         refresh_token: r.refreshToken,
@@ -59,42 +57,7 @@ function AuthPage() {
       if (error) throw error;
       navigate({ to: "/dashboard" });
     } catch (e) {
-      setPiErr(e instanceof Error ? e.message : "Pi Wallet sign-in failed.");
-    } finally {
-      setPiBusy(false);
-    }
-  }
-
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    setErr(null); setMsg(null);
-    try {
-      const em = emailSchema.parse(email);
-      const pw = passwordSchema.parse(password);
-      setBusy(true);
-      if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email: em,
-          password: pw,
-          options: {
-            emailRedirectTo: `${window.location.origin}/dashboard`,
-            data: {
-              full_name: fullName.trim(),
-              username: username.trim() || em.split("@")[0],
-            },
-          },
-        });
-        if (error) throw error;
-        setMsg("Check your inbox to confirm your email, then sign in.");
-        setMode("signin");
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({ email: em, password: pw });
-        if (error) throw error;
-        navigate({ to: "/dashboard" });
-      }
-    } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : "Something went wrong";
-      setErr(message);
+      setErr(e instanceof Error ? e.message : "Pi sign-in did not complete. Please try again from the Pi Browser.");
     } finally {
       setBusy(false);
     }
@@ -106,97 +69,54 @@ function AuthPage() {
       <main className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="glass w-full max-w-md rounded-2xl p-8 border border-white/10">
           <div className="text-center mb-6">
-            <div className="mx-auto h-14 w-14 grid place-items-center rounded-full btn-gold text-onyx font-black text-2xl">π</div>
-            <h1 className="font-display text-3xl mt-3 text-gradient-gold">
-              {mode === "signin" ? "Welcome Back" : "Create Your Account"}
-            </h1>
+            <div className="mx-auto h-14 w-14 grid place-items-center rounded-full btn-gold text-onyx font-black text-2xl" aria-hidden="true">π</div>
+            <h1 className="font-display text-3xl mt-3 text-gradient-gold">Sign in with Pi</h1>
             <p className="text-silver/70 text-sm mt-1">
-              {mode === "signin" ? "Sign in to your Pi Global account" : "Join the Pi Global Marketplace"}
+              Pi Authentication is the only way to sign in here. No email address, no password.
             </p>
           </div>
 
           <button
             type="button"
             onClick={signInWithPi}
-            disabled={piBusy}
-            className="btn-gold w-full rounded-full px-4 py-2.5 text-sm font-semibold disabled:opacity-60 flex items-center justify-center gap-2"
+            disabled={busy}
+            className="btn-gold w-full rounded-full px-4 py-3 text-sm font-semibold disabled:opacity-60 flex items-center justify-center gap-2 min-h-[44px]"
           >
-            <span className="font-black">π</span>
-            {piBusy ? "Connecting…" : "Sign in with Pi Wallet"}
+            <span className="font-black" aria-hidden="true">π</span>
+            {busy ? "Verifying with Pi…" : "Continue with Pi"}
           </button>
-          <p className="text-[10px] text-silver/50 text-center mt-2">
+
+          <p className="text-[11px] text-silver/60 text-center mt-3 leading-relaxed">
             {inPiBrowser
-              ? "Pi Browser detected — this signs you in instantly, no password needed."
-              : "Open this page inside the Pi Browser to sign in with your Pi Wallet."}
+              ? "Pi Browser detected. Your Pi username is confirmed on our server before you are signed in."
+              : "Open this page inside the Pi Browser to sign in. Pi Authentication is not available in other browsers."}
           </p>
 
-          {piErr && <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300 mt-3">{piErr}</div>}
+          {!inPiBrowser && (
+            <a
+              href="https://minepi.com/download/"
+              target="_blank"
+              rel="noreferrer"
+              className="btn-ghost-silver mt-3 block rounded-full px-4 py-2.5 text-center text-xs"
+            >
+              Get the Pi Browser
+            </a>
+          )}
 
-          <details className="mt-6 pt-5 border-t border-white/10">
-            <summary className="cursor-pointer text-xs text-silver/60 text-center select-none">
-              Not on the Pi Browser? Use email instead
-            </summary>
+          {err && (
+            <div role="alert" className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300 mt-4">
+              {err}
+            </div>
+          )}
 
-          <div className="flex rounded-full border border-white/10 bg-white/5 p-1 mb-6 mt-4">
-            <button
-              onClick={() => { setMode("signin"); setErr(null); setMsg(null); }}
-              className={`flex-1 rounded-full px-3 py-1.5 text-xs font-medium transition ${mode === "signin" ? "btn-gold text-onyx" : "text-silver/80"}`}
-            >Sign In</button>
-            <button
-              onClick={() => { setMode("signup"); setErr(null); setMsg(null); }}
-              className={`flex-1 rounded-full px-3 py-1.5 text-xs font-medium transition ${mode === "signup" ? "btn-gold text-onyx" : "text-silver/80"}`}
-            >Register</button>
-          </div>
-
-          <form onSubmit={submit} className="space-y-3">
-            {mode === "signup" && (
-              <>
-                <Field label="Full Name" value={fullName} onChange={setFullName} placeholder="Ada Lovelace" required />
-                <Field label="Username" value={username} onChange={setUsername} placeholder="ada" />
-              </>
-            )}
-            <Field label="Email" type="email" value={email} onChange={setEmail} placeholder="you@example.com" required autoComplete="email" />
-            <Field label="Password" type="password" value={password} onChange={setPassword} placeholder="At least 8 characters" required autoComplete={mode === "signin" ? "current-password" : "new-password"} />
-
-            {mode === "signin" && (
-              <div className="text-right">
-                <Link to="/forgot-password" className="text-xs text-gold hover:underline">Forgot password?</Link>
-              </div>
-            )}
-
-            {err && <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">{err}</div>}
-            {msg && <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-300">{msg}</div>}
-
-            <button disabled={busy} className="btn-gold w-full rounded-full px-4 py-2.5 text-sm font-semibold disabled:opacity-60">
-              {busy ? "Please wait…" : mode === "signin" ? "Sign In" : "Create Account"}
-            </button>
-          </form>
-          </details>
+          <p className="mt-6 border-t border-white/10 pt-4 text-[10px] leading-relaxed text-silver/50">
+            Pi Global Marketplace is an independent community application built by third-party developers. It is not
+            operated, endorsed or approved by Pi Network. We never ask for your wallet passphrase, seed phrase or private key.
+            {net ? ` Network: ${net.network}.` : ""}
+          </p>
         </div>
       </main>
       <Footer />
     </div>
-  );
-}
-
-function Field({
-  label, value, onChange, type = "text", placeholder, required, autoComplete,
-}: {
-  label: string; value: string; onChange: (v: string) => void;
-  type?: string; placeholder?: string; required?: boolean; autoComplete?: string;
-}) {
-  return (
-    <label className="block">
-      <span className="text-xs text-silver/80">{label}</span>
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        required={required}
-        autoComplete={autoComplete}
-        className="mt-1 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-silver/40 focus:outline-none focus:ring-2 focus:ring-gold/40"
-      />
-    </label>
   );
 }

@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { isPiBrowser, piAuthenticateWithRecovery, type PiIncompletePayment } from "@/lib/pi-sdk";
-import { linkPiIdentity, unlinkPiIdentity } from "@/lib/pi.functions";
+import { linkPiIdentity, piNetworkConfig, unlinkPiIdentity } from "@/lib/pi.functions";
 import { recoverIncompletePiPayment } from "@/lib/escrow.functions";
 
 type LinkedPi = {
@@ -13,23 +14,28 @@ type LinkedPi = {
 };
 
 /**
- * Full Pi Wallet connect card:
- * - Detects Pi Browser
- * - Sandbox / Mainnet toggle (user-owned preference persisted on profile)
- * - Authenticates via the Pi SDK
- * - Verifies the token server-side and links pi_uid to the current profile
+ * Pi Wallet connect card.
+ *
+ * The network (Mainnet / Testnet) is decided by server configuration only —
+ * there is deliberately no user-facing network switch.
  */
 export function PiConnectCard() {
   const { user } = useAuth();
   const link = useServerFn(linkPiIdentity);
   const unlink = useServerFn(unlinkPiIdentity);
   const recover = useServerFn(recoverIncompletePiPayment);
+  const netConfig = useServerFn(piNetworkConfig);
 
   const [linked, setLinked] = useState<LinkedPi | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
-  const [sandbox, setSandbox] = useState(true);
+
+  const { data: net } = useQuery({
+    queryKey: ["pi-network-config"],
+    queryFn: () => netConfig(),
+    staleTime: 60 * 60 * 1000,
+  });
 
   useEffect(() => {
     if (!user) return;
@@ -41,7 +47,6 @@ export function PiConnectCard() {
       .then(({ data }) => {
         if (!data) return;
         setLinked(data as LinkedPi);
-        setSandbox(data.pi_sandbox ?? true);
       });
   }, [user]);
 
@@ -50,17 +55,18 @@ export function PiConnectCard() {
   async function connect() {
     setBusy(true); setErr(null); setOk(null);
     try {
-      const authed = await piAuthenticateWithRecovery(sandbox, async (payment: PiIncompletePayment) => {
+      const cfg = net ?? (await netConfig());
+      const authed = await piAuthenticateWithRecovery(cfg.sandbox, async (payment: PiIncompletePayment) => {
         const paymentId = payment.identifier;
         const escrowId = payment.metadata?.["escrowId"];
         if (!paymentId || typeof escrowId !== "string") return;
         await recover({ data: { paymentId, escrowId, txId: payment.transaction?.txid } });
       });
-      const r = await link({ data: { accessToken: authed.accessToken, sandbox } });
+      const r = await link({ data: { accessToken: authed.accessToken } });
       setLinked({ pi_uid: r.uid, pi_username: r.username, pi_sandbox: r.sandbox });
       setOk(`Connected as @${r.username}`);
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "Pi connection failed.");
+      setErr(e instanceof Error ? e.message : "Pi connection did not complete. Please try again.");
     } finally {
       setBusy(false);
     }
@@ -70,10 +76,10 @@ export function PiConnectCard() {
     setBusy(true); setErr(null); setOk(null);
     try {
       await unlink({ data: {} });
-      setLinked({ pi_uid: null, pi_username: null, pi_sandbox: sandbox });
+      setLinked({ pi_uid: null, pi_username: null, pi_sandbox: linked?.pi_sandbox ?? false });
       setOk("Pi identity disconnected.");
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "Disconnect failed.");
+      setErr(e instanceof Error ? e.message : "Disconnect did not complete. Please try again.");
     } finally {
       setBusy(false);
     }
@@ -93,32 +99,13 @@ export function PiConnectCard() {
             </p>
             <p className="mt-1 text-[11px] text-silver/60">
               {connected
-                ? `Linked on ${linked?.pi_sandbox ? "Testnet (Sandbox)" : "Mainnet"}`
+                ? `Linked on ${net?.network === "testnet" ? "Testnet" : "Mainnet"}`
                 : inPiBrowser
                   ? "Pi Browser detected — ready to sign in."
                   : "Open this app in the Pi Browser to connect."}
             </p>
           </div>
           <span className={`h-2.5 w-2.5 rounded-full ${connected ? "bg-emerald-400" : "bg-silver/40"}`} />
-        </div>
-
-        <div className="mt-4 inline-flex rounded-full border border-white/10 bg-black/40 p-0.5 text-[11px]">
-          <button
-            type="button"
-            onClick={() => setSandbox(true)}
-            disabled={connected}
-            className={`rounded-full px-3 py-1 ${sandbox ? "btn-gold text-onyx" : "text-silver/70"} disabled:opacity-50`}
-          >
-            Testnet
-          </button>
-          <button
-            type="button"
-            onClick={() => setSandbox(false)}
-            disabled={connected}
-            className={`rounded-full px-3 py-1 ${!sandbox ? "btn-gold text-onyx" : "text-silver/70"} disabled:opacity-50`}
-          >
-            Mainnet
-          </button>
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
@@ -128,7 +115,7 @@ export function PiConnectCard() {
                 type="button"
                 onClick={connect}
                 disabled={busy || !inPiBrowser}
-                className="btn-gold rounded-full px-4 py-2 text-xs disabled:opacity-50"
+                className="btn-gold rounded-full px-4 py-2.5 text-xs disabled:opacity-50 min-h-[44px]"
               >
                 {busy ? "Connecting…" : "Connect Pi Wallet"}
               </button>
@@ -137,7 +124,7 @@ export function PiConnectCard() {
                   href="https://minepi.com/download/"
                   target="_blank"
                   rel="noreferrer"
-                  className="btn-ghost-silver rounded-full px-4 py-2 text-xs"
+                  className="btn-ghost-silver rounded-full px-4 py-2.5 text-xs min-h-[44px] inline-flex items-center"
                 >
                   Get Pi Browser
                 </a>
@@ -148,19 +135,19 @@ export function PiConnectCard() {
               type="button"
               onClick={disconnect}
               disabled={busy}
-              className="btn-ghost-silver rounded-full px-4 py-2 text-xs"
+              className="btn-ghost-silver rounded-full px-4 py-2.5 text-xs min-h-[44px]"
             >
               {busy ? "Disconnecting…" : "Disconnect"}
             </button>
           )}
         </div>
 
-        {err && <p className="mt-3 text-xs text-destructive">{err}</p>}
+        {err && <p role="alert" className="mt-3 text-xs text-destructive">{err}</p>}
         {ok && <p className="mt-3 text-xs text-emerald-300">{ok}</p>}
 
         <p className="mt-4 text-[10px] leading-relaxed text-silver/50">
-          Sign-in returns your Pi UID and username. Payments become available once the store completes
-          Pi Network's mainnet review.
+          Signing in confirms your Pi UID and username on our server. We never ask for your wallet passphrase, seed
+          phrase or private key.
         </p>
       </div>
     </div>

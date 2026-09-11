@@ -29,10 +29,24 @@ type OrderRow = {
   listings: { title: string | null } | null;
 };
 
+/**
+ * Transitions a seller may perform. "paid" is intentionally absent: only the
+ * server-side Pi payment verifier can mark an order as paid.
+ */
+const SELLER_NEXT: Record<OrderRow["status"], OrderRow["status"][]> = {
+  pending: ["cancelled"],
+  paid: ["shipped", "refunded"],
+  shipped: ["completed", "refunded"],
+  completed: [],
+  cancelled: [],
+  refunded: [],
+};
+
 function OrdersPage() {
   const qc = useQueryClient();
   const [uid, setUid] = useState<string | null>(null);
   const [tab, setTab] = useState<"purchases" | "sales">("purchases");
+  const [err, setErr] = useState<string | null>(null);
   const { usdPerPi } = usePricing();
   useEffect(() => { supabase.auth.getUser().then(({ data }) => setUid(data.user?.id ?? null)); }, []);
 
@@ -48,7 +62,12 @@ function OrdersPage() {
   });
 
   async function updateStatus(id: string, status: OrderRow["status"]) {
-    await supabase.from("orders").update({ status }).eq("id", id);
+    setErr(null);
+    const { error } = await supabase.from("orders").update({ status }).eq("id", id);
+    if (error) {
+      setErr(error.message);
+      return;
+    }
     qc.invalidateQueries({ queryKey: ["orders", uid, tab] });
   }
 
@@ -65,6 +84,12 @@ function OrdersPage() {
           >{k}</button>
         ))}
       </div>
+
+      {err && (
+        <div role="alert" className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
+          {err}
+        </div>
+      )}
 
       {isLoading ? (
         <div className="text-sm text-silver/60">Loading…</div>
@@ -90,9 +115,15 @@ function OrdersPage() {
                 <p className="text-[10px] text-silver/50">${o.price_usd.toLocaleString()}</p>
               </div>
               <StatusBadge status={o.status} />
-              {tab === "sales" && o.status !== "completed" && o.status !== "cancelled" && (
-                <select value={o.status} onChange={(e) => updateStatus(o.id, e.target.value as OrderRow["status"])} className="rounded-full border border-white/10 bg-black/40 px-3 py-1 text-xs text-silver">
-                  {(["pending", "paid", "shipped", "completed", "cancelled", "refunded"] as const).map((s) => <option key={s} value={s} className="bg-onyx">{s}</option>)}
+              {tab === "sales" && SELLER_NEXT[o.status].length > 0 && (
+                <select
+                  value={o.status}
+                  aria-label="Update order status"
+                  onChange={(e) => updateStatus(o.id, e.target.value as OrderRow["status"])}
+                  className="rounded-full border border-white/10 bg-black/40 px-3 py-1 text-xs text-silver"
+                >
+                  <option value={o.status} className="bg-onyx">{o.status}</option>
+                  {SELLER_NEXT[o.status].map((s) => <option key={s} value={s} className="bg-onyx">{s}</option>)}
                 </select>
               )}
             </li>

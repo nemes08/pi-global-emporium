@@ -8,7 +8,7 @@ import { Footer } from "@/components/Footer";
 import { SearchBar, emptyFilters, type SearchFilters } from "@/components/SearchBar";
 import { SmartSearch } from "@/components/SmartSearch";
 import { MarketplaceCard } from "@/components/MarketplaceCard";
-import { fetchMarketplace, SORT_LABEL, type SortKey } from "@/lib/marketplace";
+import { fetchMarketplacePage, PAGE_SIZE, SORT_LABEL, type SortKey } from "@/lib/marketplace";
 import { useI18n } from "@/lib/i18n";
 
 const searchSchema = z.object({
@@ -38,13 +38,22 @@ function Marketplace() {
   const [filters, setFilters] = useState<SearchFilters>({ ...emptyFilters, category });
   const [sort, setSort] = useState<SortKey>("featured");
   const [view, setView] = useState<"grid" | "list">("grid");
+  const [page, setPage] = useState(0);
 
-  const { data: items = [], isLoading } = useQuery({
-    queryKey: ["marketplace", filters, sort],
-    queryFn: () => fetchMarketplace(filters, sort),
+  const { data, isLoading } = useQuery({
+    queryKey: ["marketplace", filters, sort, page],
+    queryFn: () => fetchMarketplacePage(filters, sort, page),
   });
 
+  const items = data?.items ?? [];
+  const total = data?.total ?? 0;
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const count = items.length;
+
+  function applyFilters(next: SearchFilters) {
+    setFilters(next);
+    setPage(0);
+  }
   const activeChips = useMemo(() => {
     const chips: { k: keyof SearchFilters; label: string }[] = [];
     (Object.keys(filters) as (keyof SearchFilters)[]).forEach((k) => {
@@ -56,6 +65,7 @@ function Marketplace() {
   }, [filters]);
 
   function clearChip(k: keyof SearchFilters) {
+    setPage(0);
     setFilters((f) => ({ ...f, [k]: (typeof f[k] === "boolean" ? false : "") as never }));
   }
 
@@ -68,14 +78,17 @@ function Marketplace() {
             <h1 className="font-display text-3xl sm:text-4xl text-silver">{t("nav.marketplace")}</h1>
             <p className="mt-2 text-sm text-muted-foreground">{t("featured.subtitle")}</p>
           </div>
-          <p className="text-xs text-silver/60">
-            {isLoading ? "Loading listings…" : `${count} ${count === 1 ? "listing" : "listings"}`}
+          <p className="text-xs text-silver/60" aria-live="polite">
+            {isLoading
+              ? "Loading listings…"
+              : `${total.toLocaleString()} ${total === 1 ? "listing" : "listings"}${pages > 1 ? ` · page ${page + 1} of ${pages}` : ""}`}
           </p>
         </div>
 
         <div className="mt-6 space-y-4">
           <SmartSearch
             onResult={(r) => {
+              setPage(0);
               setFilters((prev) => ({
                 ...prev,
                 q: r.q ?? prev.q,
@@ -92,7 +105,7 @@ function Marketplace() {
               if (r.sort) setSort(r.sort);
             }}
           />
-          <SearchBar value={filters} onSubmit={setFilters} />
+          <SearchBar value={filters} onSubmit={applyFilters} />
         </div>
 
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
@@ -111,7 +124,7 @@ function Marketplace() {
             <label className="text-[10px] uppercase tracking-widest text-silver/60">Sort</label>
             <select
               value={sort}
-              onChange={(e) => setSort(e.target.value as SortKey)}
+              onChange={(e) => { setPage(0); setSort(e.target.value as SortKey); }}
               className="rounded-full border border-white/10 bg-black/40 px-3 py-1.5 text-xs text-silver focus:outline-none focus:ring-2 focus:ring-gold/40"
             >
               {SORTS.map((s) => <option key={s} value={s} className="bg-onyx">{SORT_LABEL[s]}</option>)}
