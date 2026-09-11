@@ -96,9 +96,15 @@ function OrdersPage() {
                 <p className="text-[10px] text-silver/50">${o.price_usd.toLocaleString()}</p>
               </div>
               <StatusBadge status={o.status} />
-              {tab === "sales" && o.status !== "completed" && o.status !== "cancelled" && (
-                <select value={o.status} onChange={(e) => updateStatus(o.id, e.target.value as OrderRow["status"])} className="rounded-full border border-white/10 bg-black/40 px-3 py-1 text-xs text-silver">
-                  {(["pending", "paid", "shipped", "completed", "cancelled", "refunded"] as const).map((s) => <option key={s} value={s} className="bg-onyx">{s}</option>)}
+              {tab === "sales" && SELLER_NEXT[o.status].length > 0 && (
+                <select
+                  value={o.status}
+                  aria-label="Update order status"
+                  onChange={(e) => updateStatus(o.id, e.target.value as OrderRow["status"])}
+                  className="rounded-full border border-white/10 bg-black/40 px-3 py-1 text-xs text-silver"
+                >
+                  <option value={o.status} className="bg-onyx">{o.status}</option>
+                  {SELLER_NEXT[o.status].map((s) => <option key={s} value={s} className="bg-onyx">{s}</option>)}
                 </select>
               )}
             </li>
