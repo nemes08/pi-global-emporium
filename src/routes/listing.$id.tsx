@@ -180,9 +180,11 @@ function ListingDetail() {
     } finally { setBusy(false); }
   }
 
-  const l = data?.listing;
-  const isOwner = user && l && user.id === l.seller_id;
-  const canTransact = l && (l.status === "active");
+  const raw = data?.listing;
+  const isOwner = !!user && !!raw && user.id === raw.seller_id;
+  // Listings awaiting or failing moderation are visible to their owner only.
+  const l = raw && (isOwner || raw.moderation_status === "approved") ? raw : null;
+  const canTransact = !!l && l.status === "active" && l.moderation_status === "approved";
 
   return (
     <div className="min-h-dvh flex flex-col">
