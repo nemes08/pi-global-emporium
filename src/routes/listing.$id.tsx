@@ -65,10 +65,12 @@ function ListingDetail() {
     })();
   }, [data]);
 
-  // Track view + recently viewed
+  // Track view + recently viewed (a seller viewing their own listing doesn't count)
   useEffect(() => {
     if (!data?.listing) return;
-    supabase.from("listings").update({ views_count: (data.listing.views_count ?? 0) + 1 }).eq("id", id).then(() => {});
+    if (!user || user.id !== data.listing.seller_id) {
+      supabase.from("listings").update({ views_count: (data.listing.views_count ?? 0) + 1 }).eq("id", id).then(() => {});
+    }
     if (user) {
       supabase.from("recently_viewed").upsert({ user_id: user.id, listing_id: id, viewed_at: new Date().toISOString() }).then(() => {});
     }
@@ -123,40 +125,36 @@ function ListingDetail() {
     if (convId) navigate({ to: "/messages" });
   }
 
+  /**
+   * Starts a purchase: creates one open order (the database allows only a
+   * single open order per buyer and listing) and reserves the listing. Payment
+   * itself happens in Pi and is confirmed server-side — never here.
+   */
   async function buyNow() {
     if (!user) { navigate({ to: "/auth" }); return; }
     if (!data?.listing) return;
     if (user.id === data.listing.seller_id) { showToast("You can't buy your own listing"); return; }
     setBusy(true);
     try {
-      await supabase.from("orders").insert({
+      const { error } = await supabase.from("orders").insert({
         listing_id: id, buyer_id: user.id, seller_id: data.listing.seller_id,
         price_usd: data.listing.price_usd, status: "pending",
       });
+      if (error) {
+        showToast(
+          error.code === "23505"
+            ? "You already have an open order for this listing — continue in Orders."
+            : error.message,
+        );
+        if (error.code === "23505") navigate({ to: "/orders" });
+        return;
+      }
       await supabase.from("listings").update({ status: "reserved" }).eq("id", id);
       await supabase.from("notifications").insert({
         user_id: data.listing.seller_id, type: "order",
-        title: "New order", body: `Your listing "${data.listing.title}" was reserved.`, link: "/orders",
+        title: "New order", body: `Your listing "${data.listing.title}" was reserved pending Pi payment.`, link: "/orders",
       });
-      showToast("Order created — check Orders to pay with Pi");
-      qc.invalidateQueries({ queryKey: ["listing", id] });
-      navigate({ to: "/orders" });
-    } finally { setBusy(false); }
-  }
-
-  async function reserve() {
-    if (!user) { navigate({ to: "/auth" }); return; }
-    if (!data?.listing) return;
-    if (user.id === data.listing.seller_id) return;
-    setBusy(true);
-    try {
-      await supabase.from("orders").insert({
-        listing_id: id, buyer_id: user.id, seller_id: data.listing.seller_id,
-        price_usd: data.listing.price_usd, status: "pending",
-        notes: "Reserved with Pi (pending payment)",
-      });
-      await supabase.from("listings").update({ status: "reserved" }).eq("id", id);
-      showToast("Reserved. Continue in Orders to complete Pi payment.");
+      showToast("Order created — complete the Pi payment in Orders");
       qc.invalidateQueries({ queryKey: ["listing", id] });
       navigate({ to: "/orders" });
     } finally { setBusy(false); }
@@ -182,9 +180,11 @@ function ListingDetail() {
     } finally { setBusy(false); }
   }
 
-  const l = data?.listing;
-  const isOwner = user && l && user.id === l.seller_id;
-  const canTransact = l && (l.status === "active");
+  const raw = data?.listing;
+  const isOwner = !!user && !!raw && user.id === raw.seller_id;
+  // Listings awaiting or failing moderation are visible to their owner only.
+  const l = raw && (isOwner || raw.moderation_status === "approved") ? raw : null;
+  const canTransact = !!l && l.status === "active" && l.moderation_status === "approved";
 
   return (
     <div className="min-h-dvh flex flex-col">
@@ -256,8 +256,7 @@ function ListingDetail() {
                     <Link to="/listings/$id/edit" params={{ id: l.id }} className="btn-gold rounded-full px-4 py-2.5 text-sm text-center">Edit listing</Link>
                   ) : (
                     <>
-                      <button disabled={!canTransact || busy} onClick={buyNow} className="btn-gold rounded-full px-4 py-2.5 text-sm disabled:opacity-50">Buy Now with Pi</button>
-                      <button disabled={!canTransact || busy} onClick={reserve} className="btn-ghost-silver rounded-full px-4 py-2.5 text-sm disabled:opacity-50">Reserve with Pi</button>
+                      <button disabled={!canTransact || busy} onClick={buyNow} className="btn-gold rounded-full px-4 py-2.5 text-sm disabled:opacity-50 min-h-[44px]">Buy with Pi</button>
                       {l.negotiable && (
                         <button disabled={!canTransact || busy} onClick={() => setShowOffer((v) => !v)} className="btn-ghost-silver rounded-full px-4 py-2.5 text-sm disabled:opacity-50">Make an Offer</button>
                       )}

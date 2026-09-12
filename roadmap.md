@@ -4,35 +4,36 @@
 - [x] Frontend/backend/DB/security audit raporu
 
 ## P0 — Mainnet kritik
-- [ ] PI_LOGIN_SECRET oluştur, Pi girişini uçtan uca çalıştır
-- [ ] Ağ seçimini sunucuya taşı (PI_NETWORK), istemci Testnet/Mainnet seçicisini kaldır
-- [ ] E-posta/şifre girişini birincil auth olmaktan çıkar
-- [ ] Sipariş/ödeme tekilleştirme (çift sipariş, çift payment, çift release engeli)
-- [ ] Fonlanmamış escrow release engeli + admin aksiyonlarının audit log'u
-- [ ] Payment/Order state machine netleştirme
+- [x] PI_LOGIN_SECRET oluştur, Pi girişini uçtan uca çalıştır
+- [x] Ağ seçimini sunucuya taşı (PI_NETWORK), istemci Testnet/Mainnet seçicisini kaldır
+- [x] E-posta/şifre girişini kaldır — tek giriş yolu Pi Authentication
+- [x] Sipariş/ödeme tekilleştirme (çift sipariş, çift payment, çift release engeli)
+- [x] Fonlanmamış escrow release engeli + admin aksiyonlarının audit log'u
+- [x] Payment/Order state machine netleştirme (satıcı geçişleri kısıtlı)
 
 ## P1 — Marketplace
-- [ ] verified filtresi sorguya taşı + sayfalama
-- [ ] Moderasyon kapısı (pending → approved) gerçekten uygulansın
-- [ ] Reddedilen ilanın yeniden onayı durumu geri getirsin
-- [ ] Buy Now / Reserve ayrımı, kullanılmayan demo veriyi kaldır
+- [x] verified filtresi sorguya taşındı + sayfalama
+- [x] Moderasyon kapısı (pending → approved) uygulanıyor
+- [x] Reddedilen ilanın yeniden onayı durumu geri getiriyor
+- [x] Tek "Buy with Pi" akışı, kullanılmayan demo veri kaldırıldı
 
 ## P2 — Seller / order / admin
-- [ ] Satıcı menüsünden `paid` kaldır, hataları kullanıcıya göster
-- [ ] escrow released → listing sold + order completed senkronu
-- [ ] Reviews tekillik + satın alma kanıtı
+- [x] Satıcı menüsünden `paid` kaldırıldı, hatalar kullanıcıya gösteriliyor
+- [x] escrow released → listing sold + order completed senkronu (DB trigger)
+- [x] Reviews tekillik + satın alma kanıtı (DB trigger)
 
 ## P3 — UX / dil / performans
-- [ ] Çeviri anahtarları + 12 dil sözlüğü, RTL kontrolü
-- [ ] Boş/hata durumları, .env.example
+- [ ] Çeviri anahtarları + 12 dil sözlüğü tamamlanması, RTL gözden geçirme
+- [x] Boş/hata durumları, .env.example
 
 ## Ek istekler (2. mesaj)
-- [ ] Domain/marka uyumu raporu ("pi" ile başlayan domain riski)
-- [ ] GCV/fiat yalnızca bilgilendirici; işlem para birimi Pi
-- [ ] A2U/escrow güvenlik denetimi (çift release, seed sunucuda)
-- [ ] Gereksiz kişisel veri toplama denetimi
-- [ ] Harici yönlendirme olmadan tüm akışların uygulama içinde tamamlanması
-- [ ] Final uyum tablosu (PASS/WARNING/FAIL)
+- [x] Domain/marka uyumu raporu ("pi" ile başlayan domain riski) — kullanıcı aksiyonu gerekli
+- [x] GCV/fiat yalnızca bilgilendirici; işlem para birimi Pi
+- [x] A2U/escrow güvenlik denetimi (çift release engeli, seed yalnızca sunucuda)
+- [x] Gereksiz kişisel veri toplama denetimi (Pi girişinde e-posta toplanmıyor)
+- [x] Harici yönlendirme olmadan tüm akışların uygulama içinde tamamlanması
 
 ## Bloke (kullanıcıya bağlı)
+- [ ] Yeni production domain ("pi" ile başlamayan) bağlanması
 - [ ] Pi Developer Portal ayarları ve gerçek Pi Browser cihaz testi
+- [ ] 12 dil için profesyonel çeviri metinleri
