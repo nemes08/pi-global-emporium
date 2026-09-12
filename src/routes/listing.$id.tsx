@@ -125,40 +125,36 @@ function ListingDetail() {
     if (convId) navigate({ to: "/messages" });
   }
 
+  /**
+   * Starts a purchase: creates one open order (the database allows only a
+   * single open order per buyer and listing) and reserves the listing. Payment
+   * itself happens in Pi and is confirmed server-side — never here.
+   */
   async function buyNow() {
     if (!user) { navigate({ to: "/auth" }); return; }
     if (!data?.listing) return;
     if (user.id === data.listing.seller_id) { showToast("You can't buy your own listing"); return; }
     setBusy(true);
     try {
-      await supabase.from("orders").insert({
+      const { error } = await supabase.from("orders").insert({
         listing_id: id, buyer_id: user.id, seller_id: data.listing.seller_id,
         price_usd: data.listing.price_usd, status: "pending",
       });
+      if (error) {
+        showToast(
+          error.code === "23505"
+            ? "You already have an open order for this listing — continue in Orders."
+            : error.message,
+        );
+        if (error.code === "23505") navigate({ to: "/orders" });
+        return;
+      }
       await supabase.from("listings").update({ status: "reserved" }).eq("id", id);
       await supabase.from("notifications").insert({
         user_id: data.listing.seller_id, type: "order",
-        title: "New order", body: `Your listing "${data.listing.title}" was reserved.`, link: "/orders",
+        title: "New order", body: `Your listing "${data.listing.title}" was reserved pending Pi payment.`, link: "/orders",
       });
-      showToast("Order created — check Orders to pay with Pi");
-      qc.invalidateQueries({ queryKey: ["listing", id] });
-      navigate({ to: "/orders" });
-    } finally { setBusy(false); }
-  }
-
-  async function reserve() {
-    if (!user) { navigate({ to: "/auth" }); return; }
-    if (!data?.listing) return;
-    if (user.id === data.listing.seller_id) return;
-    setBusy(true);
-    try {
-      await supabase.from("orders").insert({
-        listing_id: id, buyer_id: user.id, seller_id: data.listing.seller_id,
-        price_usd: data.listing.price_usd, status: "pending",
-        notes: "Reserved with Pi (pending payment)",
-      });
-      await supabase.from("listings").update({ status: "reserved" }).eq("id", id);
-      showToast("Reserved. Continue in Orders to complete Pi payment.");
+      showToast("Order created — complete the Pi payment in Orders");
       qc.invalidateQueries({ queryKey: ["listing", id] });
       navigate({ to: "/orders" });
     } finally { setBusy(false); }
