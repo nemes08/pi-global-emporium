@@ -150,20 +150,44 @@ function Marketplace() {
               Try broadening the search — remove a filter, expand the price range, or explore a different category.
             </p>
             <button
-              onClick={() => { setFilters(emptyFilters); setSort("featured"); }}
+              onClick={() => { setPage(0); setFilters(emptyFilters); setSort("featured"); }}
               className="btn-gold mt-6 rounded-full px-6 py-2.5 text-xs"
             >
               Clear all filters
             </button>
           </div>
         ) : (
-          <div className={
-            view === "grid"
-              ? "mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-              : "mt-8 grid gap-6"
-          }>
-            {items.map((it) => <MarketplaceCard key={it.listing.id} item={it} />)}
-          </div>
+          <>
+            <div className={
+              view === "grid"
+                ? "mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+                : "mt-8 grid gap-6"
+            }>
+              {items.map((it) => <MarketplaceCard key={it.listing.id} item={it} />)}
+            </div>
+
+            {pages > 1 && (
+              <nav aria-label="Pagination" className="mt-10 flex items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  disabled={page === 0}
+                  className="btn-ghost-silver rounded-full px-5 py-2.5 text-xs disabled:opacity-40 min-h-[44px]"
+                >
+                  Previous
+                </button>
+                <span className="text-xs text-silver/60">Page {page + 1} of {pages}</span>
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.min(pages - 1, p + 1))}
+                  disabled={page >= pages - 1}
+                  className="btn-gold rounded-full px-5 py-2.5 text-xs disabled:opacity-40 min-h-[44px]"
+                >
+                  Next
+                </button>
+              </nav>
+            )}
+          </>
         )}
       </main>
       <Footer />
