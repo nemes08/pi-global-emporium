@@ -24,6 +24,8 @@ export type ListingRow = {
   transmission: string | null;
   cover_image: string | null;
   status: ListingStatus;
+  moderation_status: "pending" | "approved" | "rejected";
+  moderation_note: string | null;
   views_count: number;
   created_at: string;
   updated_at: string;

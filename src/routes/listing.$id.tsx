@@ -256,8 +256,7 @@ function ListingDetail() {
                     <Link to="/listings/$id/edit" params={{ id: l.id }} className="btn-gold rounded-full px-4 py-2.5 text-sm text-center">Edit listing</Link>
                   ) : (
                     <>
-                      <button disabled={!canTransact || busy} onClick={buyNow} className="btn-gold rounded-full px-4 py-2.5 text-sm disabled:opacity-50">Buy Now with Pi</button>
-                      <button disabled={!canTransact || busy} onClick={reserve} className="btn-ghost-silver rounded-full px-4 py-2.5 text-sm disabled:opacity-50">Reserve with Pi</button>
+                      <button disabled={!canTransact || busy} onClick={buyNow} className="btn-gold rounded-full px-4 py-2.5 text-sm disabled:opacity-50 min-h-[44px]">Buy with Pi</button>
                       {l.negotiable && (
                         <button disabled={!canTransact || busy} onClick={() => setShowOffer((v) => !v)} className="btn-ghost-silver rounded-full px-4 py-2.5 text-sm disabled:opacity-50">Make an Offer</button>
                       )}
